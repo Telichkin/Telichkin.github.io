@@ -42,7 +42,7 @@ a {
 a:hover {
   text-decoration: underline;
 }
-.post, .header {
+.main, .header {
   display: block;
   width: 70%;
   outline: none;
@@ -56,8 +56,23 @@ a:hover {
 .header__title {
   font-weight: 500;
 }
+.posts {
+  list-style-type: none;
+  padding: 0;
+}
+.posts__post {
+  margin: 1em 0;
+}
+.posts__link {
+  font-size: 16px;
+  font-weight: 300;
+  color: black;
+}
+.posts__link:hover {
+  text-decoration: none;
+}
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
-  .post, .header {
+  .main, .header {
     width: 100%;
   }
 }

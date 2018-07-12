@@ -174,7 +174,9 @@ const SMenuForEditor = (editor) => c(update => {
   }
 
   const saveAsHtml = () => {
-    const name = prompt('Enter file name', window.location.href.slice(1))
+    const name = prompt('Enter file name', window.location.hash.slice(1))
+    if (!name) return
+
     editor.saveAsHtmlWithName(name)
   }
 

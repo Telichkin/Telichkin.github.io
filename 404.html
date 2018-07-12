@@ -7,7 +7,7 @@
 </head>
 <body>
   <div class="header"></div>
-  <div class="post"></div>
+  <div class="main"></div>
 </body>
 <script src="simple-collections.js"></script>
 <script src="simple-render.js"></script>
@@ -15,6 +15,6 @@
 <script src="simple-router.js"></script>
 <script>
   const router = SimpleRouterForFolderWithPosts('./posts')
-  router.dispatchPath(window.location.pathname, { toHtmlNode: document.querySelector('.post') })
+  router.dispatchPath(window.location.pathname, { toHtmlNode: document.querySelector('.main') })
 </script>
 </html>
