@@ -4,6 +4,10 @@
   margin: 0;
   font-weight: 300;
 }
+body {
+  width: 70%;
+  margin: 0 auto;
+}
 hr {
   display: block;
   height: 1px;
@@ -44,10 +48,9 @@ a:hover {
 }
 .main, .header {
   display: block;
-  width: 70%;
   outline: none;
-  margin: 0 auto;
   padding: 10px;
+  margin: 0;
 }
 .header {
   margin-top: 10px;
@@ -72,8 +75,9 @@ a:hover {
   text-decoration: none;
 }
 @media only screen and (min-device-width: 320px) and (max-device-width: 480px) {
-  .main, .header {
+  body {
     width: 100%;
+    padding: 0 10px;
   }
 }
 .visible {
