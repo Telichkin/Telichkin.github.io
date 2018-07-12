@@ -8,6 +8,8 @@ const SimpleRouterForFolderWithPosts = (folder) => {
   }
 
   self.dispatchHash = (hash, { toHtmlNode }) => {
+    if (!hash.length) return
+    
     hash = hash.slice(1)
     loadHtmlStringForFilename(hash, { toHtmlNode })
   }
