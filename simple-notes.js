@@ -5,7 +5,6 @@ const SEditor = (selector, { withStorage: storage }) => {
     htmlNode = document.querySelector(selector)
     htmlNode.innerHTML = storage.download()
     htmlNode.setAttribute('contenteditable', true)
-    document.execCommand('enableObjectResizing  ', false)
     htmlNode.addEventListener('paste', pasteAsPlainText)
     htmlNode.focus()
     setInterval(saveContent, 10000)
@@ -36,6 +35,11 @@ const SEditor = (selector, { withStorage: storage }) => {
 
   self.body = () => {
     updateSelectionWithTag('div')
+  }
+
+  self.code = () => {
+    const html = window.getSelection().toString()
+    document.execCommand('insertHTML', false, `<pre class="code">${html}</pre>`)
   }
 
   self.center = () => {
@@ -120,6 +124,7 @@ const SMenuForEditor = (editor) => c(update => {
     e('button', { textContent: 'Heading', onclick: editor.heading, className: 's-menu__button' }),
     e('button', { textContent: 'Body', onclick: editor.body, className: 's-menu__button' }),
     e('button', { textContent: 'Small', onclick: editor.small, className: 's-menu__button' }),
+    e('button', { textContent: 'Code', onclick: editor.code, className: 's-menu__button' }),
     e('hr'),
     e('button', { textContent: 'Left', onclick: editor.left, className: 's-menu__button' }),
     e('button', { textContent: 'Center', onclick: editor.center, className: 's-menu__button' }),

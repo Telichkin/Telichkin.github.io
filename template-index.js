@@ -4,8 +4,16 @@ const sMeta = [
     slug: 'one-level-abstraction-tests',
   },
   {
+    title: 'Как сделать популярное веб-приложение в 2018 году?',
+    slug: 'popular-web-app-in-2018',
+  },
+  {
     title: 'Интеграционные или модульные тесты?',
     slug: 'integration-or-unit-tests',
+  },
+  {
+    title: 'У Elixir более приятный синтаксис, чем у Erlang?',
+    slug: 'is-elixir-syntax-sweet',
   },
   {
     title: 'Невозможно разрабатывать без тестов',

@@ -1,0 +1,120 @@
+<h1>У Elixir более приятный синтаксис, чем у Erlang?</h1><pre class="small">Май 2018</pre><div>Когда я впервые решил попробовать <a href="https://elixir-lang.org/">Elixir</a>, меня поразила его процесс-ориентированность. Я влюбился в нее по уши и понял, что Elixir на несколько шагов ближе к объектно-ориентированному программированию, чем любой существующий мейнстрим ОО-язык.</div><div>Чтобы научиться адекватно использовать процессы, нужно постигнуть OTP -- фреймворк для построения приложений на Erlang/Elixir. Попытавшись осилить генсервера и деревья супервизоров с помощью книги <a href="https://www.manning.com/books/elixir-in-action">Exlixir in Action</a>, я потерпел крах. Возможность написать одно и тоже несколькими способами сильно тормозило меня. Например, Map в Elixir можно писать двумя разными способами:</div><div><pre class="code"># Если ключ словаря -- атом, то можно использовать двоеточие
+iex(1)&gt; map_1 = %{key: "value"}
+%{key: "value"}
+
+# Если поставить двоеточие перед строкой, она превратиться в атом
+iex(2)&gt; map_2 = %{"key": "value"}
+%{key: "value"}
+
+# Если ключом должна быть строка, то нужно использовать "=&gt;"
+iex(3)&gt; map_2 = %{"key" =&gt; "value"}
+%{"key" =&gt; "value"}
+
+# Если ключ -- атом, то к нему можно получить доступ через точку
+iex(4)&gt; map_1.key
+"value"
+
+# или через явное указание атома
+iex(5)&gt; map_1[:key]
+"value"
+
+# А если ключ -- строка, то доступ по точке уже не работает
+iex(6)&gt; map_2.key
+** (KeyError) key :key not found in: %{"key" =&gt; "value"}
+
+# и можно использовать только явное указание
+iex(6)&gt; map_2["key"]
+"value"</pre><div>Это, конечно, мелочи, но они увеличивают кривую обучения. Когда дело доходит до конфигурирования или паттерн-матчинга с помощью Map, то хочется застрелиться.&nbsp;</div></div><div>В Erlang работа с Map более очевидна:</div><div><pre class="code">%% Ключ словаря -- атом
+1&gt; Map1 = #{key =&gt; "value"}.&nbsp;&nbsp;
+#{key =&gt; "value"}
+
+%% ключ словаря -- строка. Разницы нет.
+2&gt; Map2 = #{"key" =&gt; "value"}.
+#{"key" =&gt; "value"}
+
+%% Получение значения по ключу одинакова и с атомом,
+3&gt; maps:get(key, Map1).
+"value"
+
+%% и со строкой.
+4&gt; maps:get("key", Map2).
+"value"</pre><div>При написании генсервера или супервизора в Elixir приходится добавлять дополнительный уровень вложенности:</div></div><div><pre class="code">defmodule KV.GenServer do
+&nbsp; use GenServer
+
+&nbsp; def start_link(opts) do
+&nbsp; &nbsp; GenServer.start_link(__MODULE__, :ok, opts)
+&nbsp; end
+
+&nbsp; def lookup(server, name) do
+&nbsp; &nbsp; GenServer.call(server, {:lookup, name})
+&nbsp; end
+
+&nbsp; def create(server, name, value) do
+&nbsp; &nbsp; GenServer.cast(server, {:create, name, value})
+&nbsp; end
+
+&nbsp; def init(:ok) do
+&nbsp; &nbsp; {:ok, %{}}
+&nbsp; end
+
+&nbsp; def handle_call({:lookup, name}, _from, names) do
+&nbsp; &nbsp; {:reply, Map.fetch(names, name), names}
+&nbsp; end
+
+&nbsp; def handle_cast({:create, name, value}, names) do
+&nbsp; &nbsp; if Map.has_key?(names, name) do
+&nbsp; &nbsp; &nbsp; {:noreply, names}
+&nbsp; &nbsp; else
+&nbsp; &nbsp; &nbsp; {:noreply, Map.put(names, name, value)}
+&nbsp; &nbsp; end
+&nbsp; end
+end
+</pre><div>Erlang же говорит нам: «Ребята, не создавайте сущности. Файл -- это уже модуль, просто дайте ему имя».</div></div><div><pre class="code">-module(kv_genserver).
+-behaviour(gen_server).
+
+-export([start_link/1, lookup/2, create/3]).
+-export([init/1, handle_call/3, handle_cast/2]).
+
+start_link(Opts) -&gt;
+&nbsp; &nbsp; gen_server:start_link(?MODULE, ok, Opts).
+
+lookup(Server, Name) -&gt;
+&nbsp; &nbsp; gen_server:call(Server, {lookup, Name}).
+
+create(Server, Name, Value) -&gt;&nbsp;
+&nbsp; &nbsp; gen_server:cast(Server, {create, Name, Value}).
+
+init(ok) -&gt;
+&nbsp; &nbsp; {ok, #{}}.
+
+handle_call({lookup, Name}, _From, Names) -&gt;
+&nbsp; &nbsp; {reply, maps:get(Name, Names, error), Names}.
+
+handle_cast({create, Name, Value}, Names) -&gt;
+&nbsp; &nbsp; case maps:is_key(Name, Names) of
+&nbsp; &nbsp; &nbsp; &nbsp; true -&gt; {noreply, Names};
+&nbsp; &nbsp; &nbsp; &nbsp; false -&gt; {noreply, maps:put(Name, Value, Names)}
+&nbsp; &nbsp; end.</pre><div>При большом объеме кода, отсутствие лишнего уровня вложенности улучшает читаемость. И это важно, мы же читам код больше времени, чем пишем. Также в Erlang не приходится все конструкции оборачивать в do ... end, а однострочная и лямбда функция не отличается от обычной:</div></div><div><pre class="code">-module(example).
+-export([one_line_func/0, multi_line_func/0, lambda_inside_me/0]).
+
+one_line_func() -&gt; io:format("One line func").
+
+multi_line_func() -&gt;
+&nbsp; &nbsp; io:format("First line"),
+&nbsp; &nbsp; io:format("Second line").
+
+lambda_inside_me() -&gt;
+&nbsp; &nbsp; Lambda = fun() -&gt; io:format("Lambda") end,
+&nbsp; &nbsp; Lambda().</pre><div>В Elixir однострочные, многострочные и лямбда функции разные:</div></div><div><pre class="code">defmodule Example do
+&nbsp; def one_line_func, do: IO.puts("Only one line")
+
+&nbsp; def multi_line_func do
+&nbsp; &nbsp; IO.puts("First line")
+&nbsp; &nbsp; IO.puts("Second line")
+&nbsp; end
+
+&nbsp; def lambda_inside_me do
+&nbsp; &nbsp; lambda = fn() -&gt; IO.puts("Lambda") end
+&nbsp; &nbsp; lambda.()
+&nbsp; end
+end</pre><div>Elixir стоит использовать из-за сообщества: библиотек появляется много, новая функциональность добавляется быстро, собираются митапы и конференции, а интернет медленно, но верно начинает пестрить вакансиями. Но я всем советую сначала изучить Erlang по книге <a href="http://learnyousomeerlang.com/content">"Learn You Some Erlang for Great Good!"</a>, чтобы лучше понять процессы и OTP и почувствовать вкус лаконичного синтаксиса, который, на мой взгляд, намного приятнее, чем у Elixir.</div></div>
