@@ -49,4 +49,4 @@ const sPosts = sMeta.reverse().map(({ title, slug }, index) => e('li', { classNa
   e('a', { className: 'posts__link', href: `/${slug}`, textContent: `${index + 1}. ${title}` }),
 ))
 
-e('ol', { className: 'posts' }, ...sPosts.reverse()).appendToNode(document.querySelector('.main'))
+e('ul', { className: 'posts' }, ...sPosts.reverse()).appendToNode(document.querySelector('.main'))
