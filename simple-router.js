@@ -18,6 +18,7 @@ const SimpleRouterForFolderWithPosts = (folder) => {
     return fetch(`${folder}/${path}.html`)
       .then(resp => resp.text())
       .then(htmlString => toHtmlNode.innerHTML = htmlString)
+      .then(() => window.dispatchEvent(new Event('router/html-loaded')))
   }
 
   return self

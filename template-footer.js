@@ -30,4 +30,4 @@ const disqus_config = () => {
   this.page.identifier = 'telich'
 }
 
-window.addEventListener('load', () => sComments.appendToNode(document.querySelector('.footer')))
+window.addEventListener('router/html-loaded', () => sComments.appendToNode(document.querySelector('.footer')))
