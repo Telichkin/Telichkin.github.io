@@ -1,0 +1,88 @@
+<h1>Объектно-ориентированное программирование без классов</h1><pre class="small">Июнь 2018</pre><div>В современных объектно-ориентированных языках программирования фокус смещен с объектов и их общения на классы и типы данных. Но ООП можно реализовывать без классов, типов и даже без формальных объектов! По-сути объект является набором поведений со скрытым внутренним состоянием. Поведения – это те сообщения (методы) на которые объект может отвечать. Внутреннее состояние – это внутренняя кухня объекта, о которой никто снаружи не знает.&nbsp;</div><div>И набор поведений, и скрытое внутреннее состояние можно реализовать в любом языке программирования, который поддерживает first-class функции, замыкания и переопределение переменных. На языке JavaScript определение объекта без использования формального JavaScript-объекта будет выглядеть так:</div><div><pre class="code">function Note(title, text) {
+&nbsp; function self(method) {
+&nbsp; &nbsp; switch (method) {
+&nbsp; &nbsp; &nbsp; case 'asString': return () =&gt; {
+&nbsp; &nbsp; &nbsp; &nbsp; return `${title}\n\n${text}`;
+&nbsp; &nbsp; &nbsp; };
+&nbsp; &nbsp; &nbsp; case 'changeTitle': return (newTitle) =&gt; {
+&nbsp; &nbsp; &nbsp; &nbsp; title = newTitle;
+&nbsp; &nbsp; &nbsp; &nbsp; return self('asString')();
+&nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; }
+&nbsp; }
+&nbsp; return self;
+}
+
+const note = Note('About OOP', 'Some text');
+note('asString')();
+/*
+"About OOP
+Some text"
+*/
+
+note('changeTitle')('OOP without classes');
+/*
+"OOP without classes
+Some text"
+*/</pre><div>Получился отличный объект: он предоставляет набор поведений, а клиент этого объекта может влиять на внутреннее только через сообщения. Создать приватный метод в таком объекте – раз плюнуть:</div></div><div><pre class="code">function Note(title, text) {
+&nbsp; function self (method) {
+&nbsp; &nbsp; switch (method) {
+&nbsp; &nbsp; &nbsp; case 'asString': return format;
+&nbsp; &nbsp; &nbsp; case 'changeTitle': return (newTitle) =&gt; {
+&nbsp; &nbsp; &nbsp; &nbsp; title = newTitle;
+&nbsp; &nbsp; &nbsp; &nbsp; return format();
+&nbsp; &nbsp; &nbsp; }
+&nbsp; &nbsp; }
+&nbsp; }
+
+&nbsp; function format() {
+&nbsp; &nbsp; return `${title}\n\n${text}`;
+&nbsp; }
+&nbsp; return self;
+}
+
+const note = Note('About OOP', 'Some text');
+note('asString')();
+note('changeTitle')('OOP without classes');</pre><div>Такой подход создания объектов можно сделать намного дружелюбней, заменив switch-выражение на формальный JavaScript-объект. Не используя ни class, ни new, ни this, мы создаем прекрасные объекты:</div></div><div><pre class="code">function Note(title, text) {
+&nbsp; const self = {
+&nbsp; &nbsp; asString: format,
+&nbsp; &nbsp; changeTitle: (newTitle) =&gt; {
+&nbsp; &nbsp; &nbsp; title = newTitle;
+&nbsp; &nbsp; &nbsp; return format();
+&nbsp; &nbsp; }
+&nbsp; };
+
+&nbsp; function format() { return `${title}\n\n${text}`; }
+
+&nbsp; return self;
+}
+
+const note = Note('About OOP', 'Some text');
+note.asString();
+note.changeTitle('OOP without classes');</pre><div>На самом деле, для создания объектно-ориентированных систем в наследовании нет необходимости. Большинство задач можно решить с помощью композиции, но если очень хочется использовать наследование, то это тоже возможно:</div></div><div><pre class="code">function Superman(name, age) {
+&nbsp; const man = Man(name, age);
+&nbsp; const self = {
+&nbsp; &nbsp; whoAreYou: () =&gt; `I'm a ${age} years old superman!`,
+&nbsp; }
+&nbsp; return Object.assign({}, man, self);
+}
+
+function Man(name, age) {
+&nbsp; const self = {
+&nbsp; &nbsp; whoAreYou: () =&gt; `I'm a ${age} years old man`,
+&nbsp; &nbsp; whatIsYourName: () =&gt; `My name is ${name}`,
+&nbsp; }
+&nbsp; return self;
+}
+
+const superman = Superman('Jack', 32);
+const man = Man('Alex', 30);
+
+superman.whoAreYou();
+// "I'm a 32 years old superman!"
+man.whoAreYou();
+// "I'm a 30 years old man"
+superman.whatIsYourName();
+// "My name is Jack"
+man.whatIsYourName();
+// "My name is Alex"</pre><div>Последние два сниппета кода формально являются фабриками JavaScript-объектов, которые содержат в себе только методы и не дают напрямую управлять внутренним состоянием объекта и его приватными методами. По-сути же эти два сниппета – пример хорошего описанием объекта без использования class, new и this. Проще – лучше!</div></div><div>Если вам интересна тема ООП и его отличия от абстрактных типов данных, предлагаю почитать <a href="http://www.cs.utexas.edu/~wcook/Drafts/2009/essay.pdf">хороший paper</a>, <a href="http://wcook.blogspot.com/2012/07/proposal-for-simplified-modern.html?m=1">статью в блоге</a> и книгу <a href="https://www.ozon.ru/context/detail/id/5322055/">"Структура и Интерпретация Компьютерных Программ"</a>.</div>

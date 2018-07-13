@@ -1,5 +1,13 @@
 const sMeta = [
   {
+    title: 'Объектно-ориентированное программирование без классов',
+    slug: 'objects-vs-classes',
+  },
+  {
+    title: 'Париж',
+    slug: 'paris',
+  },
+  {
     title: 'Рефакторинг от души',
     slug: 'glided-rose-refactoring',
   },
