@@ -50,6 +50,7 @@ a {
   border: 1px solid #ddd;
   border-radius: 3px;
   color: #333;
+  overflow-x: scroll;
 }
 a:hover {
   text-decoration: underline;
