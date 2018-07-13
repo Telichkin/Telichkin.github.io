@@ -1,0 +1,377 @@
+<h1>Рефакторинг от души</h1><pre class="small">Май 2018</pre><div>Из японских боевых искусств в программирование пришло понятие "ката". Ката – это упражнение, которое помогает отточить навыки при помощи практики и повторений. Типичный программист читает, понимает и изменяет уже имеющийся код намного чаще, чем пишет новый. Чтобы сделать нечитаемое читаемым, непонятное понятным, и неизменяемое изменяемым, применяется рефакторинг. Если члены команды умеют рефакторить, в проект проще добавлять и новые фичи, и новых людей. Поэтому я решил отточить навык рефакторига с помощью соответствующей каты "Glided Rose", вот её код:</div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for i in range(0, len(items)):
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Aged Brie" != items[i].name and "Backstage passes to a TAFKAL80ETC concert" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # TODO: Improve this code. Word.
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Sulfuras, Hand of Ragnaros" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality - 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Aged Brie" == items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Increases the Quality of the stinky cheese if it's 11 days to due date.
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Aged Brie" == items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Backstage passes to a TAFKAL80ETC concert" == items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # See revision number 2394 on SVN.
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # Increases the Quality of Backstage Passes if the Quality is 6 or less.
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Sulfuras, Hand of Ragnaros" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].sell_in = items[i].sell_in - 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Aged Brie" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Backstage passes to a TAFKAL80ETC concert" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Sulfuras, Hand of Ragnaros" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality - 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # TODO: Fix this.
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality - items[i].quality
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = items[i].quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Aged Brie" == items[i].name and items[i].sell_in &lt;= 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = 0
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; # of for.
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if "Sulfuras, Hand of Ragnaros" != items[i].name:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if items[i].quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; items[i].quality = 50
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+
+class Item:
+&nbsp; &nbsp; def __init__(self, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.name = name
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def __repr__(self):
+&nbsp; &nbsp; &nbsp; &nbsp; return "%s, %s, %s" % (self.name, self.sell_in, self.quality)</pre><div>Задачей каты является добавление нового вида Item'a – "Conjured". Возможно, у вас возник вопрос: "Нам нужно просто добавить новую фичу, каким боком здесь рефакторинг?". Новая фича в таком коде – это неминуемый костыль. Можно провести ни один час в поисках правильного места для костыля, а можно потратить час на рефакторинг и добавить фичу за несколько минут. Второй вариант сэкономит время и нервы при добавлении следующей фичи, первый – приведет к выпадению волос и язве. Добавляя новую фичу без рефакторинга, вы превращаете ваш код в такую кухню:</div></div><div style="text-align: center;"><img src="https://static.tildacdn.com/tild6531-3062-4165-b235-343962373938/1302805989_the_filw.jpg"></div><div style="text-align: left;">Начнем уборку. Сначала сгруппируем расчет для каждого типа Item'a в отдельном статическом методе:</div><div style="text-align: left;"><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.name == "Aged Brie":
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; GildedRose.calc_brie(item)
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.name == "Backstage passes to a TAFKAL80ETC concert":
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; GildedRose.calc_backstage(item)
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.name == "Sulfuras, Hand of Ragnaros":
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; GildedRose.calc_sulfuras(item)
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; GildedRose.calc_simple(item)
+
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def calc_simple(item):
+&nbsp; &nbsp; &nbsp; &nbsp; item.sell_in = item.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 50
+
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def calc_brie(item):
+&nbsp; &nbsp; &nbsp; &nbsp; item.sell_in = item.sell_in - 1
+&nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt;= 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 0
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 50
+
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def calc_backstage(item):
+&nbsp; &nbsp; &nbsp; &nbsp; item.sell_in = item.sell_in - 1
+&nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = item.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 0
+
+&nbsp; &nbsp; &nbsp; &nbsp; if item.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 50
+
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def calc_sulfuras(item):
+&nbsp; &nbsp; &nbsp; &nbsp; pass
+
+
+class Item:
+&nbsp; &nbsp; def __init__(self, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.name = name
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def __repr__(self):
+&nbsp; &nbsp; &nbsp; &nbsp; return "%s, %s, %s" % (self.name, self.sell_in, self.quality)</pre><div>Этот код выглядит лучше исходного. Стоит только добавить еще один статический метод и еще один if, и задача решена. Но на данном этапе, наш код остается процедурным.&nbsp;</div><div>Методы класса GlidedRose работают с Item'ами как со структурой данных. Объекты в ООП – это не структуры данных, объекты – это поведение. Вы перестаете писать процедурный код только тогда, когда перестаете копаться во внутренностях объектов. Перенесем большую часть поведения в Item:</div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.name == "Aged Brie":
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.calc_brie()
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.name == "Backstage passes to a TAFKAL80ETC concert":
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.calc_backstage()
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.name == "Sulfuras, Hand of Ragnaros":
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.calc_sulfuras()
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.calc_simple()
+
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+
+class Item:
+&nbsp; &nbsp; def __init__(self, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.name = name
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def calc_simple(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 50
+
+&nbsp; &nbsp; def calc_brie(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt;= 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 0
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 50
+
+&nbsp; &nbsp; def calc_backstage(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 0
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 50
+
+&nbsp; &nbsp; def calc_sulfuras(self):
+&nbsp; &nbsp; &nbsp; &nbsp; pass</pre><div>Мне не нравится, что объект GlidedRose продолжает принимать решения в зависимости от состояния Item'а. Давайте перенесем диспатч правильного действия внутрь Item'a. А еще удалим метод calc_backstage, он делает тоже самое, что и calc_brie:</div></div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.update_quality()
+
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+
+class Item:
+&nbsp; &nbsp; def __init__(self, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.name = name
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; concrete_method = {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Aged Brie": self._calc_brie,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Backstage passes to a TAFKAL80ETC concert": self._calc_brie,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Sulfuras, Hand of Ragnaros": self._calc_sulfuras,
+&nbsp; &nbsp; &nbsp; &nbsp; }.get(self.name, self._calc_simple)
+
+&nbsp; &nbsp; &nbsp; &nbsp; concrete_method()
+
+&nbsp; &nbsp; def _calc_simple(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 50
+
+&nbsp; &nbsp; def _calc_brie(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &lt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 6:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 11:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = self.quality + 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 0
+
+&nbsp; &nbsp; &nbsp; &nbsp; if self.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; self.quality = 50
+
+&nbsp; &nbsp; def _calc_sulfuras(self):
+&nbsp; &nbsp; &nbsp; &nbsp; pass</pre><div>Сделаем еще немного косметических изменений. Избавимся от всех if'ов с помощью вспомогательной функции cond, а вместо проверок на quality будем приводить его к минимальному или максимальному значению в самом конце расчета:</div></div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.update_quality()
+
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+
+class Item:
+&nbsp; &nbsp; def __init__(self, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.name = name
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; concrete_method = {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Aged Brie": self._calc_brie,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Backstage passes to a TAFKAL80ETC concert": self._calc_brie,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Sulfuras, Hand of Ragnaros": self._calc_sulfuras,
+&nbsp; &nbsp; &nbsp; &nbsp; }.get(self.name, self._calc_simple)
+
+&nbsp; &nbsp; &nbsp; &nbsp; concrete_method()
+
+&nbsp; &nbsp; def _calc_simple(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 0, self.quality - 1),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, self.quality - 2))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = max(0, self.quality)
+
+&nbsp; &nbsp; def _calc_brie(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, 0),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 6, self.quality + 3),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 11, self.quality + 2),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 11, self.quality + 1))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = min(50, self.quality)
+
+&nbsp; &nbsp; def _calc_sulfuras(self):
+&nbsp; &nbsp; &nbsp; &nbsp; pass
+
+
+def cond(*args):
+&nbsp; &nbsp; for is_true, returnable in args:
+&nbsp; &nbsp; &nbsp; &nbsp; if is_true:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return returnable</pre><div>А теперь добавим вишенку на торт – полиморфизм. С помощью полиморфизма мы делегируем ответственность за выбор конкретного алгоритма расчета маленьким объектам. Возможно, звучит сложно, но код выглядит очень просто. Объект Item в данном случае становится фабрикой, чтобы не нарушать интерфейс и не ломать клиентов (например, тесты):</div></div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.update_quality()
+
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+
+class Item:
+&nbsp; &nbsp; def __new__(cls, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; item_class = {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Aged Brie": SpecialItem,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Backstage passes to a TAFKAL80ETC concert": SpecialItem,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Sulfuras, Hand of Ragnaros": ImmutableItem,
+&nbsp; &nbsp; &nbsp; &nbsp; }.get(name, DefaultItem)
+
+&nbsp; &nbsp; &nbsp; &nbsp; return item_class(sell_in, quality)
+
+
+class ImmutableItem:
+&nbsp; &nbsp; def __init__(self, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; pass
+
+
+class DefaultItem(ImmutableItem):
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 0, self.quality - 1),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, self.quality - 2))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = max(0, self.quality)
+
+
+class SpecialItem(ImmutableItem):
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, 0),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 6, self.quality + 3),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 11, self.quality + 2),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 11, self.quality + 1))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = min(50, self.quality)
+
+
+def cond(*args):
+&nbsp; &nbsp; for is_true, returnable in args:
+&nbsp; &nbsp; &nbsp; &nbsp; if is_true:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return returnable</pre><div>Этот код объектно-ориентированный, в отличие от изначального процедурного, его можно переиспользовать. Добавление фичи в такой код – почти всегда добавление нового кода, а не изменение старого. И делается это просто!</div></div><div><pre class="code">class ConjuredItem(ImmutableItem):
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in -= 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 0, self.quality - 2),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, self.quality - 4))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = max(0, self.quality)</pre><div>Напоследок оставляю слова мудрого программиста, которые нужно повторять каждый раз перед добавлением новой фичи: <a href="https://twitter.com/KentBeck/status/250733358307500032">«for each desired change, make the change easy (warning: this may be hard), then make the easy change»</a><br></div></div></div>

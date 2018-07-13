@@ -1,5 +1,13 @@
 const sMeta = [
   {
+    title: 'Рефакторинг от души',
+    slug: 'glided-rose-refactoring',
+  },
+  {
+    title: 'Один инбокс для всего-всего',
+    slug: 'one-inbox-is-overkill',
+  },
+  {
     title: 'Тесты на одном уровне абстракции',
     slug: 'one-level-abstraction-tests',
   },
