@@ -1,5 +1,9 @@
 const sMeta = [
   {
+    title: 'Переезд заметок с Tilda на Github',
+    slug: 'from-tilda-to-github',
+  },
+  {
     title: 'Объектно-ориентированное программирование без классов',
     slug: 'objects-vs-classes',
   },
