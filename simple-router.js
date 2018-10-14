@@ -9,11 +9,11 @@ const SimpleRouterForFolderWithPosts = (folder, { mainPageIs: mainPage }) => {
   }
 
   const loadHtmlStringForFilename = (path, { toHtmlNode }) => {
-    path = path.endsWith('/') ? path.slice(0, -1) : path
-    return fetch(`${folder}/${path || mainPage}.html`)
+    path = (path.endsWith('/') ? path.slice(0, -1) : path) || mainPage
+    return fetch(`${folder}/${path}.html`)
       .then(resp => resp.text())
       .then(htmlString => toHtmlNode.innerHTML = htmlString)
-      .then(() => window.dispatchEvent(new Event('router/html-loaded')))
+      .then(() => (path !== mainPage) && window.dispatchEvent(new Event('router/post-loaded')))
   }
 
   return self
