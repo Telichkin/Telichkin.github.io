@@ -1,21 +1,16 @@
-const SimpleRouterForFolderWithPosts = (folder) => {
+const SimpleRouterForFolderWithPosts = (folder, { mainPageIs: mainPage }) => {
   let self = {}
 
-  self.dispatchPath = (path, { toHtmlNode }) => {
-    path = path.startsWith('/') ? path.slice(1) : path
-    path = path.endsWith('/') ? path.slice(0, -1) : path
-    loadHtmlStringForFilename(path, { toHtmlNode })
-  }
-
-  self.dispatchHash = (hash, { toHtmlNode }) => {
-    if (!hash.length) return
-    
-    hash = hash.slice(1)
-    loadHtmlStringForFilename(hash, { toHtmlNode })
+  self.dispatchHashToHtmlNode = node => {
+    let hash = window.location.hash
+    hash = hash.slice(2)
+    window.history.replaceState(null, null, hash)
+    loadHtmlStringForFilename(hash, { toHtmlNode: node })
   }
 
   const loadHtmlStringForFilename = (path, { toHtmlNode }) => {
-    return fetch(`${folder}/${path}.html`)
+    path = path.endsWith('/') ? path.slice(0, -1) : path
+    return fetch(`${folder}/${path || mainPage}.html`)
       .then(resp => resp.text())
       .then(htmlString => toHtmlNode.innerHTML = htmlString)
       .then(() => window.dispatchEvent(new Event('router/html-loaded')))

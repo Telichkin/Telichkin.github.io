@@ -8,7 +8,6 @@
 <body>
   <div class="header"></div>
   <div class="main"></div>
-  <div class="footer"></div>
   <menu></menu>
 </body>
 <script src="simple-collections.js"></script>
@@ -17,14 +16,13 @@
 <script src="simple-notes.js"></script>
 <script src="simple-router.js"></script>
 <script src="template-header.js"></script>
-<script src="template-footer.js"></script>
 <script>
   const editor = SEditor('.main', { withStorage: SStorage('simple-notes') }),
-    router = SimpleRouterForFolderWithPosts('./posts')
+    router = SimpleRouterForFolderWithPosts('./posts', { mainPageIs: 'notes' })
     menu = document.querySelector('menu')
   
   SMenuForEditor(editor).appendToNode(menu)
 
-  router.dispatchHash(window.location.hash, { toHtmlNode: document.querySelector('.main') })
+  router.dispatchHashToHtmlNode(document.querySelector('.main'))
 </script>
 </html>

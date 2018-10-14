@@ -3,20 +3,10 @@
   <meta charset="utf-8">
   <title>Заметки Романа Теличкина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="/index.css">
 </head>
 <body>
-  <div class="header"></div>
-  <div class="main"></div>
-  <div class="footer"></div>
 </body>
-<script src="/simple-collections.js"></script>
-<script src="/simple-render.js"></script>
-<script src="/simple-router.js"></script>
-<script src="/template-header.js"></script>
-<script src="/template-footer.js"></script>
 <script>
-  const router = SimpleRouterForFolderWithPosts('/posts')
-  router.dispatchPath(window.location.pathname, { toHtmlNode: document.querySelector('.main') })
+  window.location.replace('/#' + window.location.pathname)
 </script>
 </html>

@@ -8,9 +8,17 @@
 <body>
   <div class="header"></div>
   <div class="main"></div>
+  <div class="footer"></div>
 </body>
 <script src="/simple-collections.js"></script>
 <script src="/simple-render.js"></script>
+<script src="/simple-router.js"></script>
 <script src="/template-header.js"></script>
-<script src="/template-index.js"></script>
+<script>
+  const router = SimpleRouterForFolderWithPosts('./posts', { mainPageIs: 'notes' })
+  const dispatch = () => router.dispatchHashToHtmlNode(document.querySelector('.main'))
+  window.addEventListener('hashchange', dispatch)
+  window.addEventListener('popstate', () => !window.location.hash && window.location.reload())
+  dispatch()
+</script>
 </html>
