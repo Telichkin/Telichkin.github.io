@@ -1,4 +1,4 @@
-const SimpleRouterForFolderWithPosts = (folder, { mainPageIs: mainPage }) => {
+const SRouterForFolderWithPosts = (folder, { mainPageIs: mainPage }) => {
   let self = {}
 
   self.dispatchHashToHtmlNode = node => {

@@ -3,22 +3,22 @@
   <meta charset="utf-8">
   <title>Заметки Романа Теличкина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./index.css">
+  <link rel="stylesheet" href="/index.css">
 </head>
 <body>
   <div class="header"></div>
   <div class="main"></div>
   <menu></menu>
 </body>
-<script src="simple-collections.js"></script>
-<script src="simple-render.js"></script>
-<script src="simple-storage.js"></script>
-<script src="simple-notes.js"></script>
-<script src="simple-router.js"></script>
-<script src="template-header.js"></script>
+<script src="/simple-collections.js"></script>
+<script src="/simple-render.js"></script>
+<script src="/simple-storage.js"></script>
+<script src="/simple-notes.js"></script>
+<script src="/simple-router.js"></script>
+<script src="/template-header.js"></script>
 <script>
   const editor = SEditor('.main', { withStorage: SStorage('simple-notes') }),
-    router = SimpleRouterForFolderWithPosts('./posts', { mainPageIs: 'notes' })
+    router = SRouterForFolderWithPosts('/posts', { mainPageIs: 'notes' })
     menu = document.querySelector('menu')
   
   SMenuForEditor(editor).appendToNode(menu)

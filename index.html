@@ -16,7 +16,7 @@
 <script src="/template-header.js"></script>
 <script src="/template-footer.js"></script>
 <script>
-  const router = SimpleRouterForFolderWithPosts('./posts', { mainPageIs: 'notes' })
+  const router = SRouterForFolderWithPosts('/posts', { mainPageIs: 'notes' })
   const dispatch = () => router.dispatchHashToHtmlNode(document.querySelector('.main'))
   window.addEventListener('hashchange', dispatch)
   window.addEventListener('popstate', () => !window.location.hash && window.location.reload())
