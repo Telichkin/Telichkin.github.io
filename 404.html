@@ -3,10 +3,22 @@
   <meta charset="utf-8">
   <title>Заметки Романа Теличкина</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/index.css">
 </head>
 <body>
 </body>
 <script>
-  window.location.replace('/#' + window.location.pathname)
+  if (window.location.pathname.indexOf('/notes') === -1) {
+    window.location.replace('/notes' + window.location.pathname)
+  } else {
+    document.body.innerHTML = `
+  <div class="header">
+    <a href="/">Заметки Романа Теличкина</a>
+  </div>
+  <div class="main">
+    <h1>Такой заметки не существует</h1>
+  </div>  
+    `
+  }
 </script>
 </html>

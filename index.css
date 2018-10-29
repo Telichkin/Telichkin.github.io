@@ -127,17 +127,16 @@ a:hover {
   background: #69a6f9;
   color: white;
 }
-.footer {
+.comments {
   margin-bottom: 40px;
-}
-.s-comments {
   text-align: center;
 }
-.s-comments__open-button {
+.open-comments {
   border: 1px solid #00acf3;
   padding: 10px 20px;
   display: inline-block;
   margin: 0;
   cursor: pointer;
+  margin: 0 0 1em 0;
   font-weight: 600;
 }
