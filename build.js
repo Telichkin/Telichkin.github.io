@@ -4,8 +4,13 @@ const path = require('path')
 
 mustache.escape = value => value
 
-const rawPostsDir = './_raw'
 const builtPostsDir = './notes'
+fs.readdirSync(builtPostsDir).forEach(fileName => {
+  const builtPostPath = path.join(builtPostsDir, fileName)
+  fs.unlinkSync(builtPostPath)
+})
+
+const rawPostsDir = './_raw'
 fs.readdirSync(rawPostsDir).forEach(fileName => {
   const rawPostPath = path.join(rawPostsDir, fileName)
   const rawPost = fs.readFileSync(rawPostPath)
