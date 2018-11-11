@@ -1,6 +1,6 @@
 {
   "background_color": "white",
-  "theme_color": "white",
+  "theme_color": "#0095de",
   "description": "Time tracking for sushi wok",
   "display": "standalone",
   "orientation": "portrait",

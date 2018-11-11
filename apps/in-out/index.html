@@ -59,7 +59,7 @@
     }
 
     .all-days {
-      padding: 0 5vw;
+      padding: 0 3vw;
       overflow-y: scroll;
       flex: 1 1 auto;
       position: relative;
@@ -74,6 +74,10 @@
       box-shadow: 0 1px 5px rgba(32, 33, 36, 0.28);
       border-radius: 3vw;
       margin: 4vw 0;
+    }
+
+    .lunch {
+      background: #feffe1;
     }
 
     .day-title {
@@ -97,7 +101,7 @@
       margin: 0 4vw;
     }
 
-    .time * {
+    .time > * {
       font-size: inherit;
       font-family: inherit;
       outline: none;
@@ -147,25 +151,28 @@
     }
 
     function renderDay(day) {
-      return h.box().class('working-day').with(
+      return h.box().class('working-day ' + (isLunch(day) ? 'lunch' : '')).with(
         h.box().class('day-title').with(
           h.box().class('day-number').with(dayNumber(day)),
           h.box().class('day-name').with(dayName(day))),
         h.box().class('day-working-hours').with(
           h.box().class('time').with(
             h.box().visible(!isStarted(day))
-              .onClick(_ => allDaysIs(addDay(allDays(), startTimeToNow(day)))).with('Чекин'),
+              .onClick(_ => allDaysIs(addDay(allDays(), markAsOffice(startTimeToNow(day))))).with('Чекин'),
             h.input().type('time').name('start-time').value(startTimeToStr(day)).visible(isStarted(day))
               .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeStartTime(day, target.value))))),
-          h.box().class('time').with(
-            h.box().visible(isStarted(day) && !isEnded(day))
-              .onClick(_ => allDaysIs(replaceDay(allDays(), day, endTimeToNow(day)))).with('Чекаут'),
+          h.box().class('time').visible(isStarted(day)).with(
+            h.box().visible(!isEnded(day))
+              .onClick(_ => allDaysIs(replaceDay(allDays(), day, endTimeToNow(day))))
+              .with(isLunch(day) ? 'Вернулся' : 'Чекаут'),
             h.input().type('time').name('end-time').value(endTimeToStr(day)).visible(isEnded(day))
-              .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeEndTime(day, target.value)))))),
+              .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeEndTime(day, target.value))))),
+          h.box().class('time').visible(isLunch(day) && !isStarted(day)).with(
+            h.box().onClick(_ => allDaysIs(addDay(allDays(), markAsLunch(startTimeToNow(day))))).with('На обед'))),
         h.box().class('total-time').with(formatMinutes(timeDiffInMinutes(day))))
     }
 
-        function h(el) {
+    function h(el) {
       this.el = el
     }
 
@@ -246,9 +253,7 @@
     }
 
     function timeToDate(aString, date) {
-      if (!aString) {
-        return
-      }
+      if (!aString) { return }
       return date.set('h', aString.split(':')[0]).set('m', aString.split(':')[1])
     }
 
@@ -264,8 +269,20 @@
       return day1.id === day2.id
     }
 
+    function isLunch(day) {
+      return day.type === 'lunch'
+    }
+
+    function markAsLunch(day) {
+      return Object.assign({}, day, {type: 'lunch'})
+    }
+
+    function markAsOffice(day) {
+      return Object.assign({}, day, {type: 'office'})
+    }
+
     function startTimeToNow(day) {
-      return changeStartTime(day, timeToStr(dayjs(Date.now())))
+      return changeStartTime(day, timeToStr(today()))
     }
 
     function changeStartTime(day, startTime) {
@@ -273,7 +290,7 @@
     }
 
     function endTimeToNow(day) {
-      return changeEndTime(day, timeToStr(dayjs(Date.now())))
+      return changeEndTime(day, timeToStr(today()))
     }
 
     function changeEndTime(day, endTime) {
@@ -296,10 +313,6 @@
       return aTime ? aTime.format('HH:mm') : ''
     }
 
-    function timeDiffInMinutes(day) {
-      return (!isStarted(day) || !isEnded(day)) ? 0 : endTime(day).diff(startTime(day), 'minute')
-    }
-
     function formatMinutes(aNumber) {
       const hours = Math.floor(aNumber / 60)
       const minutes = Math.max(aNumber - hours * 60, 0)
@@ -310,16 +323,25 @@
       return Math.round(totalMinutes(dayList) / (size(uniqueDates(dayList)) || 1))
     }
 
-    function totalMinutes(dayList) {
+    function sumMinutes(dayList) {
       return dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0)
     }
 
-    function uniqueDates(dayList) {
-      return dayList.reduce((unique, d) => hasWithSameDate(unique, d) ? unique : [...unique, d], [])
+    function timeDiffInMinutes(day) {
+      return Math.max(!isStarted(day) ? 0 : (endTime(day) || today()).diff(startTime(day), 'minute'), 0)
     }
 
-    function hasWithSameDate(dayList, day) {
-      return size(dayList.filter(d => d.date === day.date));
+    function totalMinutes(dayList) {
+      return uniqueDates(dayList).reduce((sum, d) =>
+        sum + totalOfficeMinutesForDate(dayList, d.date) + totalLunchMinutesForDate(dayList, d.date), 0)
+    }
+
+    function uniqueDates(dayList) {
+      return dayList.reduce((unique, d) => hasSameDateAsDay(unique, d) ? unique : [...unique, d], [])
+    }
+
+    function hasSameDateAsDay(dayList, day) {
+      return size(dayList.filter(d => d.date === day.date)) > 0;
     }
 
     function isEmpty(dayList) {
@@ -331,11 +353,39 @@
     }
 
     function last(dayList) {
-      return dayList[0] || emptyDay(dayList)
+      return dayList[0] || emptyDayWithType(dayList, 'office')
     }
 
     function emptyDay(dayList) {
-      return {id: size(dayList), date: dayjs(Date.now()).format('YYYY-MM-DD'), startTime: '', endTime: ''}
+      return emptyDayWithType(dayList, isLunchAvailable(dayList) ? 'lunch' : 'office')
+    }
+
+    function emptyDayWithType(dayList, type) {
+      return {id: size(dayList), type, date: today().format('YYYY-MM-DD'), startTime: '', endTime: ''}
+    }
+
+    function isLunchAvailable(dayList) {
+      return !isEmpty(dayList) && isToday(last(dayList)) && totalLunchMinutesForDate(dayList, dateToStr(today())) < 60
+    }
+
+    function totalLunchMinutesForDate(dayList, date) {
+      return Math.min(60, sumMinutes(dayList.filter(d => d.date === date).filter(isLunch)))
+    }
+
+    function totalOfficeMinutesForDate(dayList, date) {
+      return sumMinutes(dayList.filter(d => d.date === date).filter(d => !isLunch(d)))
+    }
+
+    function isToday(day) {
+      return day.date === dateToStr(today())
+    }
+
+    function today() {
+      return dayjs()
+    }
+
+    function dateToStr(date) {
+      return date.format('YYYY-MM-DD')
     }
 
     function allDays() {
