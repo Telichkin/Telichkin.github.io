@@ -1,0 +1,17 @@
+{
+  "background_color": "white",
+  "theme_color": "white",
+  "description": "Time tracking for sushi wok",
+  "display": "standalone",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "128x128",
+      "type": "image/png"
+    }
+  ],
+  "name": "Check-in/Check-out",
+  "short_name": "in-out",
+  "start_url": "/in-out"
+}

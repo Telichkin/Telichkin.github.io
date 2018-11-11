@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <link rel="manifest" href="manifest.json">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://unpkg.com/dayjs"></script>
+  <title>Чекин-чекаут</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: sans-serif;
+    }
+
+    .invisible {
+      display: none !important;
+    }
+
+    .time-tracking {
+      margin: 0 auto;
+      padding: 0 5vw;
+      font-size: 4vw;
+    }
+
+    .month-header {
+      padding: 5vw 0;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: space-around;
+      border-bottom: 0.5vw solid;
+    }
+
+    .month-hours {
+      width: 70%;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 4vw;
+    }
+
+    .month-name {
+      width: 30%;
+      text-align: center;
+      font-size: 5vw;
+    }
+
+    .working-day {
+      display: flex;
+      flex-direction: row;
+      padding: 2vw;
+      height: 10vw;
+      border-bottom: 0.1vw solid black;
+    }
+
+    .day-title {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      width: 12%;
+    }
+
+    .day-working-hours {
+      display: flex;
+      flex-direction: row;
+      justify-content: space-around;
+      align-items: center;
+      width: 75%;
+    }
+
+    .time {
+      width: 50%;
+      margin: 0 4vw;
+    }
+
+    .time * {
+      font-size: inherit;
+      font-family: inherit;
+      outline: none;
+      border: none;
+      border-bottom: 1px dashed blue;
+      color: blue;
+      background: white;
+      width: 100%;
+      line-height: 1.5;
+      text-align: center;
+    }
+
+    .change-time {
+      outline: none;
+      font-size: inherit;
+      font-family: inherit;
+    }
+
+    .total-time {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+  </style>
+</head>
+<body>
+</body>
+<script>
+  (function() {
+
+    function render(dayList) {
+      document.body.innerText = ''
+      document.body.appendChild(h.box().class('time-tracking').with(
+        renderHeader(dayList),
+        h.box().class('all-hours').with(
+          renderDay(emptyDay(dayList)).visible(isEmpty(dayList) || isEnded(last(dayList))),
+          ...dayList.map(renderDay),
+        )).el)
+    }
+
+    function renderHeader(dayList) {
+      return h.box().class('month-header').with(
+        h.box().class('month-name').with('Ноябрь'),
+        h.box().class('month-hours').with(
+          h.box().class('worked-hours').with('Всего: ', formatMinutes(totalMinutes(dayList))),
+          h.box().class('avg-hours-in-month').with('В среднем в день: ', formatMinutes(avgMinutes(dayList)))))
+    }
+
+    function renderDay(day) {
+      return h.box().class('working-day').with(
+        h.box().class('day-title').with(
+          h.box().class('day-number').with(dayNumber(day)),
+          h.box().class('day-name').with(dayName(day))),
+        h.box().class('day-working-hours').with(
+          h.box().class('time').with(
+            h.box().visible(!isStarted(day))
+              .onClick(_ => allDaysIs(addDay(allDays(), startTimeToNow(day)))).with('Чекин'),
+            h.input().type('time').name('start-time').value(startTimeToStr(day)).visible(isStarted(day))
+              .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeStartTime(day, target.value))))),
+          h.box().class('time').with(
+            h.box().visible(isStarted(day) && !isEnded(day))
+              .onClick(_ => allDaysIs(replaceDay(allDays(), day, endTimeToNow(day)))).with('Чекаут'),
+            h.input().type('time').name('end-time').value(endTimeToStr(day)).visible(isEnded(day))
+              .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeEndTime(day, target.value)))))),
+        h.box().class('total-time').with(formatMinutes(timeDiffInMinutes(day))))
+    }
+
+        function h(el) {
+      this.el = el
+    }
+
+    h.box = function () {
+      return new h(document.createElement('div'))
+    }
+
+    h.input = function () {
+      return new h(document.createElement('input'))
+    }
+
+    h.prototype.class = function (name) {
+      return this.attr('class', name)
+    }
+
+    h.prototype.type = function (type) {
+      return this.attr('type', type)
+    }
+
+    h.prototype.name = function (name) {
+      return this.attr('name', name)
+    }
+
+    h.prototype.value = function (value) {
+      return this.attr('value', value)
+    }
+
+    h.prototype.attr = function (name, value) {
+      this.el.setAttribute(name, value)
+      return this
+    }
+
+    h.prototype.onClick = function (aFunc) {
+      this.el.onclick = aFunc
+      return this
+    }
+
+    h.prototype.onBlur = function (aFunc) {
+      this.el.onblur = aFunc
+      return this
+    }
+
+    h.prototype.visible = function (aBool) {
+      aBool ? this.el.classList.remove('invisible') : this.el.classList.add('invisible')
+      return this
+    }
+
+    h.prototype.with = function (...args) {
+      this.el.innerHTML = ''
+      args.forEach(arg => {
+        if (typeof arg === 'string') {
+          this.el.appendChild(document.createTextNode(arg))
+        } else {
+          arg && arg.el && this.el.appendChild(arg.el)
+        }
+      })
+      return this
+    }
+
+    function dayNumber(day) {
+      return dayjs(day.date).date().toString()
+    }
+
+    function isStarted(day) {
+      return Boolean(startTime(day))
+    }
+
+    function isEnded(day) {
+      return Boolean(endTime(day))
+    }
+
+    function startTime(day) {
+      return timeToDate(day.startTime, dayjs(day.date))
+    }
+
+    function endTime(day) {
+      return timeToDate(day.endTime, dayjs(day.date))
+    }
+
+    function timeToDate(aString, date) {
+      if (!aString) {
+        return
+      }
+      return date.set('h', aString.split(':')[0]).set('m', aString.split(':')[1])
+    }
+
+    function addDay(dayList, newDay) {
+      return [newDay, ...dayList]
+    }
+
+    function replaceDay(dayList, oldDay, newDay) {
+      return dayList.reduce((replaced, day) => [...replaced, isEqual(day, oldDay) ? newDay : day], [])
+    }
+
+    function isEqual(day1, day2) {
+      return day1.id === day2.id
+    }
+
+    function startTimeToNow(day) {
+      return changeStartTime(day, timeToStr(dayjs(Date.now())))
+    }
+
+    function changeStartTime(day, startTime) {
+      return Object.assign({}, day, {startTime})
+    }
+
+    function endTimeToNow(day) {
+      return changeEndTime(day, timeToStr(dayjs(Date.now())))
+    }
+
+    function changeEndTime(day, endTime) {
+      return Object.assign({}, day, {endTime})
+    }
+
+    function dayName(day) {
+      return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][dayjs(day.date).day()]
+    }
+
+    function startTimeToStr(day) {
+      return timeToStr(startTime(day)) || 'Чекин'
+    }
+
+    function endTimeToStr(day) {
+      return timeToStr(endTime(day)) || 'Чекаут'
+    }
+
+    function timeToStr(aTime) {
+      return aTime ? aTime.format('HH:mm') : ''
+    }
+
+    function timeDiffInMinutes(day) {
+      return (!isStarted(day) || !isEnded(day)) ? 0 : endTime(day).diff(startTime(day), 'minute')
+    }
+
+    function formatMinutes(aNumber) {
+      const hours = Math.floor(aNumber / 60)
+      const minutes = Math.max(aNumber - hours * 60, 0)
+      return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}`
+    }
+
+    function avgMinutes(dayList) {
+      return Math.round(totalMinutes(dayList) / (size(uniqueDates(dayList)) || 1))
+    }
+
+    function totalMinutes(dayList) {
+      return dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0)
+    }
+
+    function uniqueDates(dayList) {
+      return dayList.reduce((unique, d) => hasWithSameDate(unique, d) ? unique : [...unique, d], [])
+    }
+
+    function hasWithSameDate(dayList, day) {
+      return size(dayList.filter(d => d.date === day.date));
+    }
+
+    function isEmpty(dayList) {
+      return size(dayList) === 0
+    }
+
+    function size(dayList) {
+      return dayList.length
+    }
+
+    function last(dayList) {
+      return dayList[0] || emptyDay(dayList)
+    }
+
+    function emptyDay(dayList) {
+      return {id: size(dayList), date: dayjs(Date.now()).format('YYYY-MM-DD'), startTime: '', endTime: ''}
+    }
+
+    function allDays() {
+      return JSON.parse(localStorage.getItem('days')) || []
+    }
+
+    function allDaysIs(dayList) {
+      localStorage.setItem('days', JSON.stringify(dayList.filter(isValidDay)))
+      window.dispatchEvent(new Event('storage'))
+    }
+
+    function isValidDay(day) {
+      return day.date && (startTime(day) || (startTime(day) && endTime(day)))
+    }
+
+    window.addEventListener('storage', () => render(allDays()))
+    render(allDays())
+
+  })()
+</script>
+</html>
