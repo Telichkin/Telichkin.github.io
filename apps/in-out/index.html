@@ -147,7 +147,9 @@
         h.box().class('month-name').with('Ноябрь'),
         h.box().class('month-hours').with(
           h.box().class('worked-hours').with('Всего: ', formatMinutes(totalMinutes(dayList))),
-          h.box().class('avg-hours-in-month').with('В среднем в день: ', formatMinutes(avgMinutes(dayList)))))
+          h.box().class('overtime').with(isOvertime(dayList) 
+            ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList)) 
+            : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)))))
     }
 
     function renderDay(day) {
@@ -176,29 +178,17 @@
       this.el = el
     }
 
-    h.box = function () {
-      return new h(document.createElement('div'))
-    }
+    h.box = function () { return new h(document.createElement('div')) }
 
-    h.input = function () {
-      return new h(document.createElement('input'))
-    }
+    h.input = function () { return new h(document.createElement('input')) }
 
-    h.prototype.class = function (name) {
-      return this.attr('class', name)
-    }
+    h.prototype.class = function (name) { return this.attr('class', name) }
 
-    h.prototype.type = function (type) {
-      return this.attr('type', type)
-    }
+    h.prototype.type = function (type) { return this.attr('type', type) }
 
-    h.prototype.name = function (name) {
-      return this.attr('name', name)
-    }
+    h.prototype.name = function (name) { return this.attr('name', name) }
 
-    h.prototype.value = function (value) {
-      return this.attr('value', value)
-    }
+    h.prototype.value = function (value) { return this.attr('value', value) }
 
     h.prototype.attr = function (name, value) {
       this.el.setAttribute(name, value)
@@ -232,86 +222,50 @@
       return this
     }
 
-    function dayNumber(day) {
-      return dayjs(day.date).date().toString()
-    }
+    function dayNumber(day) { return dayjs(day.date).date().toString() }
 
-    function isStarted(day) {
-      return Boolean(startTime(day))
-    }
+    function isStarted(day) { return Boolean(startTime(day)) }
 
-    function isEnded(day) {
-      return Boolean(endTime(day))
-    }
+    function isEnded(day) { return Boolean(endTime(day)) }
 
-    function startTime(day) {
-      return timeToDate(day.startTime, dayjs(day.date))
-    }
+    function startTime(day) { return timeToDate(day.startTime, dayjs(day.date)) }
 
-    function endTime(day) {
-      return timeToDate(day.endTime, dayjs(day.date))
-    }
+    function endTime(day) { return timeToDate(day.endTime, dayjs(day.date)) }
 
     function timeToDate(aString, date) {
       if (!aString) { return }
       return date.set('h', aString.split(':')[0]).set('m', aString.split(':')[1])
     }
 
-    function addDay(dayList, newDay) {
-      return [newDay, ...dayList]
-    }
+    function addDay(dayList, newDay) { return [newDay, ...dayList] }
 
     function replaceDay(dayList, oldDay, newDay) {
       return dayList.reduce((replaced, day) => [...replaced, isEqual(day, oldDay) ? newDay : day], [])
     }
 
-    function isEqual(day1, day2) {
-      return day1.id === day2.id
-    }
+    function isEqual(day1, day2) { return day1.id === day2.id }
 
-    function isLunch(day) {
-      return day.type === 'lunch'
-    }
+    function isLunch(day) { return day.type === 'lunch' }
 
-    function markAsLunch(day) {
-      return Object.assign({}, day, {type: 'lunch'})
-    }
+    function markAsLunch(day) { return Object.assign({}, day, {type: 'lunch'}) }
 
-    function markAsOffice(day) {
-      return Object.assign({}, day, {type: 'office'})
-    }
+    function markAsOffice(day) { return Object.assign({}, day, {type: 'office'}) }
 
-    function startTimeToNow(day) {
-      return changeStartTime(day, timeToStr(today()))
-    }
+    function startTimeToNow(day) { return changeStartTime(day, timeToStr(today())) }
 
-    function changeStartTime(day, startTime) {
-      return Object.assign({}, day, {startTime})
-    }
+    function changeStartTime(day, startTime) { return Object.assign({}, day, {startTime}) }
 
-    function endTimeToNow(day) {
-      return changeEndTime(day, timeToStr(today()))
-    }
+    function endTimeToNow(day) { return changeEndTime(day, timeToStr(today())) }
 
-    function changeEndTime(day, endTime) {
-      return Object.assign({}, day, {endTime})
-    }
+    function changeEndTime(day, endTime) { return Object.assign({}, day, {endTime}) }
 
-    function dayName(day) {
-      return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][dayjs(day.date).day()]
-    }
+    function dayName(day) { return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][dayjs(day.date).day()] }
 
-    function startTimeToStr(day) {
-      return timeToStr(startTime(day)) || 'Чекин'
-    }
+    function startTimeToStr(day) { return timeToStr(startTime(day)) }
 
-    function endTimeToStr(day) {
-      return timeToStr(endTime(day)) || 'Чекаут'
-    }
+    function endTimeToStr(day) { return timeToStr(endTime(day)) }
 
-    function timeToStr(aTime) {
-      return aTime ? aTime.format('HH:mm') : ''
-    }
+    function timeToStr(aTime) { return aTime ? aTime.format('HH:mm') : '' }
 
     function formatMinutes(aNumber) {
       const hours = Math.floor(aNumber / 60)
@@ -319,17 +273,19 @@
       return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}`
     }
 
-    function avgMinutes(dayList) {
-      return Math.round(totalMinutes(dayList) / (size(uniqueDates(dayList)) || 1))
-    }
+    function avgMinutes(dayList) { return Math.round(totalMinutes(dayList) / (size(uniqueDates(dayList)) || 1)) }
 
-    function sumMinutes(dayList) {
-      return dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0)
-    }
+    function sumMinutes(dayList) { return dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0) }
 
-    function timeDiffInMinutes(day) {
+    function timeDiffInMinutes(day) { 
       return Math.max(!isStarted(day) ? 0 : (endTime(day) || today()).diff(startTime(day), 'minute'), 0)
     }
+    
+    function isOvertime(dayList) { return diffFromNormInMinutes(dayList) >= 0 }
+
+    function diffFromNormInMinutes(dayList) { return totalMinutes(dayList) - size(uniqueDates(dayList)) * dayNormInMinutes() }
+
+    function dayNormInMinutes() { return 9 * 60 }
 
     function totalMinutes(dayList) {
       return uniqueDates(dayList).reduce((sum, d) =>
@@ -340,28 +296,20 @@
       return dayList.reduce((unique, d) => hasSameDateAsDay(unique, d) ? unique : [...unique, d], [])
     }
 
-    function hasSameDateAsDay(dayList, day) {
-      return size(dayList.filter(d => d.date === day.date)) > 0;
-    }
+    function hasSameDateAsDay(dayList, day) { return size(dayList.filter(d => d.date === day.date)) > 0 }
 
-    function isEmpty(dayList) {
-      return size(dayList) === 0
-    }
+    function isEmpty(dayList) { return size(dayList) === 0 }
 
-    function size(dayList) {
-      return dayList.length
-    }
+    function size(dayList) { return dayList.length }
 
-    function last(dayList) {
-      return dayList[0] || emptyDayWithType(dayList, 'office')
-    }
+    function last(dayList) { return dayList[0] || emptyDayWithType(dayList, 'office') }
 
     function emptyDay(dayList) {
       return emptyDayWithType(dayList, isLunchAvailable(dayList) ? 'lunch' : 'office')
     }
 
     function emptyDayWithType(dayList, type) {
-      return {id: size(dayList), type, date: today().format('YYYY-MM-DD'), startTime: '', endTime: ''}
+      return {id: size(dayList), type, date: dateToStr(today()), startTime: '', endTime: ''}
     }
 
     function isLunchAvailable(dayList) {
@@ -376,30 +324,20 @@
       return sumMinutes(dayList.filter(d => d.date === date).filter(d => !isLunch(d)))
     }
 
-    function isToday(day) {
-      return day.date === dateToStr(today())
-    }
+    function isToday(day) { return day.date === dateToStr(today()) }
 
-    function today() {
-      return dayjs()
-    }
+    function today() { return dayjs() }
 
-    function dateToStr(date) {
-      return date.format('YYYY-MM-DD')
-    }
+    function dateToStr(date) { return date.format('YYYY-MM-DD') }
 
-    function allDays() {
-      return JSON.parse(localStorage.getItem('days')) || []
-    }
+    function allDays() { return JSON.parse(localStorage.getItem('days')) || [] }
 
     function allDaysIs(dayList) {
       localStorage.setItem('days', JSON.stringify(dayList.filter(isValidDay)))
       window.dispatchEvent(new Event('storage'))
     }
 
-    function isValidDay(day) {
-      return day.date && (startTime(day) || (startTime(day) && endTime(day)))
-    }
+    function isValidDay(day) { return day.date && startTime(day) }
 
     window.addEventListener('storage', () => render(allDays()))
     render(allDays())
