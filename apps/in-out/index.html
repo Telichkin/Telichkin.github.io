@@ -7,9 +7,14 @@
   <script src="https://unpkg.com/dayjs"></script>
   <title>Чекин-чекаут</title>
   <style>
+    html, body, .time-tracking {
+      height: 100%;
+    }
+
     body {
       margin: 0;
       font-family: sans-serif;
+      overflow: hidden;
     }
 
     .invisible {
@@ -18,17 +23,24 @@
 
     .time-tracking {
       margin: 0 auto;
-      padding: 0 5vw;
       font-size: 4vw;
+      display: flex;
+      height: 100%;
+      flex-direction: column;
     }
 
     .month-header {
-      padding: 5vw 0;
+      height: 17vw;
       display: flex;
       flex-direction: row;
       align-items: center;
       justify-content: space-around;
-      border-bottom: 0.5vw solid;
+      border-bottom: 1px solid #ebebeb;
+      background: #0095de;
+      width: 100%;
+      flex: 0 0 auto;
+      color: white;
+      font-weight: 600;
     }
 
     .month-hours {
@@ -46,12 +58,22 @@
       font-size: 5vw;
     }
 
+    .all-days {
+      padding: 0 5vw;
+      overflow-y: scroll;
+      flex: 1 1 auto;
+      position: relative;
+    }
+
     .working-day {
       display: flex;
       flex-direction: row;
       padding: 2vw;
       height: 10vw;
-      border-bottom: 0.1vw solid black;
+      background: white;
+      box-shadow: 0 1px 5px rgba(32, 33, 36, 0.28);
+      border-radius: 3vw;
+      margin: 4vw 0;
     }
 
     .day-title {
@@ -80,9 +102,9 @@
       font-family: inherit;
       outline: none;
       border: none;
-      border-bottom: 1px dashed blue;
-      color: blue;
-      background: white;
+      border-bottom: 1px dashed #0095de;
+      color: #0095de;
+      background: inherit;
       width: 100%;
       line-height: 1.5;
       text-align: center;
@@ -110,7 +132,7 @@
       document.body.innerText = ''
       document.body.appendChild(h.box().class('time-tracking').with(
         renderHeader(dayList),
-        h.box().class('all-hours').with(
+        h.box().class('all-days').with(
           renderDay(emptyDay(dayList)).visible(isEmpty(dayList) || isEnded(last(dayList))),
           ...dayList.map(renderDay),
         )).el)
