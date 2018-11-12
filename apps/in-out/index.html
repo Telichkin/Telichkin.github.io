@@ -147,8 +147,8 @@
         h.box().class('month-name').with('Ноябрь'),
         h.box().class('month-hours').with(
           h.box().class('worked-hours').with('Всего: ', formatMinutes(totalMinutes(dayList))),
-          h.box().class('overtime').with(isOvertime(dayList) 
-            ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList)) 
+          h.box().class('overtime').with(isOvertime(dayList)
+            ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList))
             : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)))))
     }
 
@@ -174,9 +174,7 @@
         h.box().class('total-time').with(formatMinutes(timeDiffInMinutes(day))))
     }
 
-    function h(el) {
-      this.el = el
-    }
+    function h(el) { this.el = el }
 
     h.box = function () { return new h(document.createElement('div')) }
 
@@ -273,14 +271,12 @@
       return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}`
     }
 
-    function avgMinutes(dayList) { return Math.round(totalMinutes(dayList) / (size(uniqueDates(dayList)) || 1)) }
-
     function sumMinutes(dayList) { return dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0) }
 
-    function timeDiffInMinutes(day) { 
+    function timeDiffInMinutes(day) {
       return Math.max(!isStarted(day) ? 0 : (endTime(day) || today()).diff(startTime(day), 'minute'), 0)
     }
-    
+
     function isOvertime(dayList) { return diffFromNormInMinutes(dayList) >= 0 }
 
     function diffFromNormInMinutes(dayList) { return totalMinutes(dayList) - size(uniqueDates(dayList)) * dayNormInMinutes() }
@@ -340,8 +336,8 @@
     function isValidDay(day) { return day.date && startTime(day) }
 
     window.addEventListener('storage', () => render(allDays()))
+    setInterval(() => render(allDays()), 60 * 1000)
     render(allDays())
-
   })()
 </script>
 </html>
