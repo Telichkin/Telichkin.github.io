@@ -165,7 +165,11 @@
               .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeStartTime(day, target.value))))),
           h.box().class('time').visible(isStarted(day)).with(
             h.box().visible(!isEnded(day))
-              .onClick(_ => allDaysIs(replaceDay(allDays(), day, endTimeToNow(day))))
+              .onClick(_ => {
+                const newDays = replaceDay(allDays(), day, endTimeToNow(day))
+                if (isLunch(day)) { allDaysIs(addDay(newDays, startTimeToNow(emptyDayWithType(newDays, 'office')))) }
+                else { allDaysIs(newDays) }
+              })
               .with(isLunch(day) ? 'Вернулся' : 'Чекаут'),
             h.input().type('time').name('end-time').value(endTimeToStr(day)).visible(isEnded(day))
               .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeEndTime(day, target.value))))),
