@@ -128,31 +128,27 @@
   </style>
 </head>
 <body>
+    <div class='time-tracking'>
+        <div class='month-header'></div>
+        <div class='all-days'></div>
+    </div>
 </body>
 <script>
   (function() {
   
     function render(dayList) {
-      document.body.innerHTML = `
-      <div class='time-tracking'>
-        ${renderHeader(dayList)}
-        <div class='all-days'>
-          ${dayList.map(day => renderDay(day)).join('\n')}
-        </div>
-      </div>
-      `
+      document.querySelector('.month-header').innerHTML = renderHeader(dayList)
+      document.querySelector('.all-days').innerHTML = dayList.map(day => renderDay(day)).join('\n')
     }
 
     function renderHeader(dayList) {
       return `
-      <div class='month-header'>
-        <div class='month-name'>Ноябрь</div>
-        <div class='month-hours'>
-          <div class='worked-hours'>Всего: ${formatMinutes(totalMinutes(dayList))}</div>
-          <div class='overtime'>${isOvertime(dayList) 
-              ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList))
-              : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)) }
-          </div>
+      <div class='month-name'>Ноябрь</div>
+      <div class='month-hours'>
+        <div class='worked-hours'>Всего: ${formatMinutes(totalMinutes(dayList))}</div>
+        <div class='overtime'>${isOvertime(dayList) 
+            ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList))
+            : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)) }
         </div>
       </div>
       `
@@ -330,10 +326,10 @@
         lunch: (_, days, day) => allDaysIs(addDay(days, markAsLunch(startTimeToNow(day)))),
       }), true)
 
-      document.body.addEventListener('blur', react({
-        startTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeStartTime(day, target.value))),
-        endTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeEndTime(day, target.value))),
-      }), true)
+    document.body.addEventListener('blur', react({
+      startTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeStartTime(day, target.value))),
+      endTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeEndTime(day, target.value))),
+    }), true)
   })()
 </script>
 </html>
