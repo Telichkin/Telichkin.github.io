@@ -131,97 +131,57 @@
 </body>
 <script>
   (function() {
-
+  
     function render(dayList) {
-      document.body.innerText = ''
-      document.body.appendChild(h.box().class('time-tracking').with(
-        renderHeader(dayList),
-        h.box().class('all-days').with(
-          renderDay(emptyDay(dayList)).visible(isEmpty(dayList) || isEnded(last(dayList))),
-          ...dayList.map(renderDay),
-        )).el)
+      document.body.innerHTML = `
+      <div class='time-tracking'>
+        ${renderHeader(dayList)}
+        <div class='all-days'>
+          ${dayList.map(day => renderDay(day)).join('\n')}
+        </div>
+      </div>
+      `
     }
 
     function renderHeader(dayList) {
-      return h.box().class('month-header').with(
-        h.box().class('month-name').with('Ноябрь'),
-        h.box().class('month-hours').with(
-          h.box().class('worked-hours').with('Всего: ', formatMinutes(totalMinutes(dayList))),
-          h.box().class('overtime').with(isOvertime(dayList)
-            ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList))
-            : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)))))
+      return `
+      <div class='month-header'>
+        <div class='month-name'>Ноябрь</div>
+        <div class='month-hours'>
+          <div class='worked-hours'>Всего: ${formatMinutes(totalMinutes(dayList))}</div>
+          <div class='overtime'>${isOvertime(dayList) 
+              ? 'Переработка: ' + formatMinutes(diffFromNormInMinutes(dayList))
+              : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)) }
+          </div>
+        </div>
+      </div>
+      `
     }
 
     function renderDay(day) {
-      return h.box().class('working-day ' + (isLunch(day) ? 'lunch' : '')).with(
-        h.box().class('day-title').with(
-          h.box().class('day-number').with(dayNumber(day)),
-          h.box().class('day-name').with(dayName(day))),
-        h.box().class('day-working-hours').with(
-          h.box().class('time').with(
-            h.box().visible(!isStarted(day))
-              .onClick(_ => allDaysIs(addDay(allDays(), markAsOffice(startTimeToNow(day))))).with('Чекин'),
-            h.input().type('time').name('start-time').value(startTimeToStr(day)).visible(isStarted(day))
-              .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeStartTime(day, target.value))))),
-          h.box().class('time').visible(isStarted(day)).with(
-            h.box().visible(!isEnded(day))
-              .onClick(_ => {
-                const newDays = replaceDay(allDays(), day, endTimeToNow(day))
-                if (isLunch(day)) { allDaysIs(addDay(newDays, startTimeToNow(emptyDayWithType(newDays, 'office')))) }
-                else { allDaysIs(newDays) }
-              })
-              .with(isLunch(day) ? 'Вернулся' : 'Чекаут'),
-            h.input().type('time').name('end-time').value(endTimeToStr(day)).visible(isEnded(day))
-              .onBlur(({target}) => allDaysIs(replaceDay(allDays(), day, changeEndTime(day, target.value))))),
-          h.box().class('time').visible(isLunch(day) && !isStarted(day)).with(
-            h.box().onClick(_ => allDaysIs(addDay(allDays(), markAsLunch(startTimeToNow(day))))).with('На обед'))),
-        h.box().class('total-time').with(formatMinutes(timeDiffInMinutes(day))))
-    }
-
-    function h(el) { this.el = el }
-
-    h.box = function () { return new h(document.createElement('div')) }
-
-    h.input = function () { return new h(document.createElement('input')) }
-
-    h.prototype.class = function (name) { return this.attr('class', name) }
-
-    h.prototype.type = function (type) { return this.attr('type', type) }
-
-    h.prototype.name = function (name) { return this.attr('name', name) }
-
-    h.prototype.value = function (value) { return this.attr('value', value) }
-
-    h.prototype.attr = function (name, value) {
-      this.el.setAttribute(name, value)
-      return this
-    }
-
-    h.prototype.onClick = function (aFunc) {
-      this.el.onclick = aFunc
-      return this
-    }
-
-    h.prototype.onBlur = function (aFunc) {
-      this.el.onblur = aFunc
-      return this
-    }
-
-    h.prototype.visible = function (aBool) {
-      aBool ? this.el.classList.remove('invisible') : this.el.classList.add('invisible')
-      return this
-    }
-
-    h.prototype.with = function (...args) {
-      this.el.innerHTML = ''
-      args.forEach(arg => {
-        if (typeof arg === 'string') {
-          this.el.appendChild(document.createTextNode(arg))
-        } else {
-          arg && arg.el && this.el.appendChild(arg.el)
-        }
-      })
-      return this
+      const lunch = isLunch(day), started = isStarted(day), ended = isEnded(day)
+      return `
+      <div class='working-day ${lunch ? 'lunch' : ''}'>
+        <div class='day-title'>
+          <div class='day-number'>${dayNumber(day)}</div>
+          <div class='day-name'>${dayName(day)}</div>
+        </div>
+        <div class='day-working-hours'>
+          <div class='time'>
+            <div class='${started ? 'invisible' : ''}' data-id='${day.id}' data-action='checkin'>Чекин</div>
+            <input class='${started ? '' : 'invisible'}' type='time' data-id='${day.id}' data-action='startTime' value='${startTimeToStr(day)}'/>
+          </div>
+          <div class='time ${started ? '' : 'invisible'}'>
+            <div class='${ended ? 'invisible' : ''}' data-id='${day.id}' data-action='checkout'>${lunch ? 'Вернулся': 'Чекаут'}</div>
+            <input type='time' class='${ended ? '' : 'invisible'}' data-id='${day.id}' data-action='endTime' value='${endTimeToStr(day)}'/>
+          </div> 
+          <div class='time ${(lunch && !started) ? '' : 'invisible'}'>
+            <div data-id='${day.id}' data-action='lunch'>На обед</div>
+          </div>
+        </div>
+        <div class='total-time'>${formatMinutes(timeDiffInMinutes(day))}</div>
+      </div>
+      `
     }
 
     function dayNumber(day) { return dayjs(day.date).date().toString() }
@@ -238,6 +198,8 @@
       if (!aString) { return }
       return date.set('h', aString.split(':')[0]).set('m', aString.split(':')[1])
     }
+    
+    function dayById(dayList, id) { return dayList.find(d => d.id === Number(id)) }
 
     function addDay(dayList, newDay) { return [newDay, ...dayList] }
 
@@ -302,14 +264,16 @@
 
     function size(dayList) { return dayList.length }
 
-    function last(dayList) { return dayList[0] || emptyDayWithType(dayList, 'office') }
+    function last(dayList) { return dayList[0] || emptyDayWithTypeAndId('office', 1) }
 
     function emptyDay(dayList) {
       return emptyDayWithType(dayList, isLunchAvailable(dayList) ? 'lunch' : 'office')
     }
 
-    function emptyDayWithType(dayList, type) {
-      return {id: size(dayList), type, date: dateToStr(today()), startTime: '', endTime: ''}
+    function emptyDayWithType(dayList, type) { return emptyDayWithTypeAndId(type, last(dayList).id + 1) }
+
+    function emptyDayWithTypeAndId(type, id) {
+      return {id: id, type, date: dateToStr(today()), startTime: '', endTime: ''}
     }
 
     function isLunchAvailable(dayList) {
@@ -330,18 +294,46 @@
 
     function dateToStr(date) { return date.format('YYYY-MM-DD') }
 
-    function allDays() { return JSON.parse(localStorage.getItem('days')) || [] }
+    function allDays() { 
+      const days = JSON.parse(localStorage.getItem('days')) || []
+      if (isEmpty(days) || isEnded(last(days))) { return [emptyDay(days), ...days] }
+      return days
+    }
 
     function allDaysIs(dayList) {
       localStorage.setItem('days', JSON.stringify(dayList.filter(isValidDay)))
       window.dispatchEvent(new Event('storage'))
     }
-
+    
     function isValidDay(day) { return day.date && startTime(day) }
+
+    function react(reactionMap) {
+      return event => {
+        const reaction = reactionMap[event.target.dataset.action]
+        if (!reaction) { return }
+        const days = allDays()
+        reaction(event, days, dayById(days, event.target.dataset.id))
+      }
+    }
 
     window.addEventListener('storage', () => render(allDays()))
     setInterval(() => render(allDays()), 60 * 1000)
     render(allDays())
+    
+    document.body.addEventListener('click', react({
+        checkin: (_, days, day) => allDaysIs(addDay(days, markAsOffice(startTimeToNow(day)))),
+        checkout: (_, days, day) => {
+          const newDays = replaceDay(days, day, endTimeToNow(day))
+          if (isLunch(day)) { allDaysIs(addDay(newDays, startTimeToNow(emptyDayWithType(newDays, 'office')))) }
+          else { allDaysIs(newDays) }
+        },
+        lunch: (_, days, day) => allDaysIs(addDay(days, markAsLunch(startTimeToNow(day)))),
+      }), true)
+
+      document.body.addEventListener('blur', react({
+        startTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeStartTime(day, target.value))),
+        endTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeEndTime(day, target.value))),
+      }), true)
   })()
 </script>
 </html>
