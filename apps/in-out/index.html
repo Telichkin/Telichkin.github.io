@@ -251,7 +251,7 @@
     }
 
     function uniqueDates(dayList) {
-      return dayList.reduce((unique, d) => hasSameDateAsDay(unique, d) ? unique : [...unique, d], [])
+      return dayList.reduce((unique, d) => (hasSameDateAsDay(unique, d) || !isStarted(d)) ? unique : [...unique, d], [])
     }
 
     function hasSameDateAsDay(dayList, day) { return size(dayList.filter(d => d.date === day.date)) > 0 }
