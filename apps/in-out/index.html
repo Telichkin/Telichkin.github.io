@@ -134,16 +134,15 @@
     </div>
 </body>
 <script>
-  (function() {
-  
-    function render(dayList) {
+(function() {
+  const 
+    render = dayList => {
       document.querySelector('.month-header').innerHTML = renderHeader(dayList)
       document.querySelector('.all-days').innerHTML = dayList.map(day => renderDay(day)).join('\n')
-    }
+    },
 
-    function renderHeader(dayList) {
-      return `
-      <div class='month-name'>Ноябрь</div>
+    renderHeader = dayList => `
+      <div class='month-name'>${monthToStr(currentMonth())}</div>
       <div class='month-hours'>
         <div class='worked-hours'>Всего: ${formatMinutes(totalMinutes(dayList))}</div>
         <div class='overtime'>${isOvertime(dayList) 
@@ -151,185 +150,185 @@
             : 'Недоработка: ' + formatMinutes(-diffFromNormInMinutes(dayList)) }
         </div>
       </div>
-      `
-    }
+      `,
 
-    function renderDay(day) {
+    renderDay = day => {
       const lunch = isLunch(day), started = isStarted(day), ended = isEnded(day)
       return `
-      <div class='working-day ${lunch ? 'lunch' : ''}'>
+      <div class='working-day ${lunch ? 'lunch' : ''}' data-id='${day.id}'>
         <div class='day-title'>
           <div class='day-number'>${dayNumber(day)}</div>
           <div class='day-name'>${dayName(day)}</div>
         </div>
         <div class='day-working-hours'>
           <div class='time'>
-            <div class='${started ? 'invisible' : ''}' data-id='${day.id}' data-action='checkin'>Чекин</div>
-            <input class='${started ? '' : 'invisible'}' type='time' data-id='${day.id}' data-action='startTime' value='${startTimeToStr(day)}'/>
+            <div class='${started ? 'invisible' : ''}' data-action='checkin'>Чекин</div>
+            <input class='${started ? '' : 'invisible'}' type='time' data-action='startTime' value='${startTimeToStr(day)}'/>
           </div>
           <div class='time ${started ? '' : 'invisible'}'>
-            <div class='${ended ? 'invisible' : ''}' data-id='${day.id}' data-action='checkout'>${lunch ? 'Вернулся': 'Чекаут'}</div>
-            <input type='time' class='${ended ? '' : 'invisible'}' data-id='${day.id}' data-action='endTime' value='${endTimeToStr(day)}'/>
+            <div class='${ended ? 'invisible' : ''}' data-action='checkout'>${lunch ? 'Вернулся': 'Чекаут'}</div>
+            <input type='time' class='${ended ? '' : 'invisible'}' data-action='endTime' value='${endTimeToStr(day)}'/>
           </div> 
           <div class='time ${(lunch && !started) ? '' : 'invisible'}'>
-            <div data-id='${day.id}' data-action='lunch'>На обед</div>
+            <div data-action='lunch'>На обед</div>
           </div>
         </div>
         <div class='total-time'>${formatMinutes(timeDiffInMinutes(day))}</div>
       </div>
       `
-    }
+    },
+    
+    currentMonth = _ => today().month(),
 
-    function dayNumber(day) { return dayjs(day.date).date().toString() }
+    monthToStr = month => ['Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь', 'Ноябрь', 'Декабрь'][month],
 
-    function isStarted(day) { return Boolean(startTime(day)) }
+    dayNumber = day => dayjs(day.date).date().toString(),
 
-    function isEnded(day) { return Boolean(endTime(day)) }
+    isStarted = day => Boolean(startTime(day)),
 
-    function startTime(day) { return timeToDate(day.startTime, dayjs(day.date)) }
+    isEnded = day => Boolean(endTime(day)),
 
-    function endTime(day) { return timeToDate(day.endTime, dayjs(day.date)) }
+    startTime = day => timeToDate(day.startTime, dayjs(day.date)),
 
-    function timeToDate(aString, date) {
+    endTime = day => timeToDate(day.endTime, dayjs(day.date)),
+
+    timeToDate = (aString, date) => {
       if (!aString) { return }
       return date.set('h', aString.split(':')[0]).set('m', aString.split(':')[1])
-    }
+    },
     
-    function dayById(dayList, id) { return dayList.find(d => d.id === Number(id)) }
+    dayById = (dayList, id) => dayList.find(d => d.id === Number(id)),
 
-    function addDay(dayList, newDay) { return [newDay, ...dayList] }
+    addDay = (dayList, newDay) => [newDay, ...dayList],
 
-    function replaceDay(dayList, oldDay, newDay) {
-      return dayList.reduce((replaced, day) => [...replaced, isEqual(day, oldDay) ? newDay : day], [])
-    }
+    replaceDay = (dayList, oldDay, newDay) => 
+      dayList.reduce((replaced, day) => [...replaced, isEqual(day, oldDay) ? newDay : day], []),
 
-    function isEqual(day1, day2) { return day1.id === day2.id }
+    isEqual = (day1, day2) => day1.id === day2.id,
 
-    function isLunch(day) { return day.type === 'lunch' }
+    isLunch = day => day.type === 'lunch',
 
-    function markAsLunch(day) { return Object.assign({}, day, {type: 'lunch'}) }
+    markAsLunch = day => Object.assign({}, day, {type: 'lunch'}),
 
-    function markAsOffice(day) { return Object.assign({}, day, {type: 'office'}) }
+    markAsOffice = day => Object.assign({}, day, {type: 'office'}),
 
-    function startTimeToNow(day) { return changeStartTime(day, timeToStr(today())) }
+    startTimeToNow = day => changeStartTime(day, timeToStr(today())),
 
-    function changeStartTime(day, startTime) { return Object.assign({}, day, {startTime}) }
+    changeStartTime = (day, startTime) => Object.assign({}, day, {startTime}),
 
-    function endTimeToNow(day) { return changeEndTime(day, timeToStr(today())) }
+    endTimeToNow = day => changeEndTime(day, timeToStr(today())),
 
-    function changeEndTime(day, endTime) { return Object.assign({}, day, {endTime}) }
+    changeEndTime = (day, endTime) => Object.assign({}, day, {endTime}),
 
-    function dayName(day) { return ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][dayjs(day.date).day()] }
+    dayName = day => ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб'][dayjs(day.date).day()],
 
-    function startTimeToStr(day) { return timeToStr(startTime(day)) }
+    startTimeToStr = day => timeToStr(startTime(day)),
 
-    function endTimeToStr(day) { return timeToStr(endTime(day)) }
+    endTimeToStr = day => timeToStr(endTime(day)),
 
-    function timeToStr(aTime) { return aTime ? aTime.format('HH:mm') : '' }
+    timeToStr = aTime => aTime ? aTime.format('HH:mm') : '',
 
-    function formatMinutes(aNumber) {
+    formatMinutes = aNumber => {
       const hours = Math.floor(aNumber / 60)
       const minutes = Math.max(aNumber - hours * 60, 0)
       return `${hours < 10 ? '0' + hours : hours}:${minutes < 10 ? '0' + minutes : minutes}`
     }
 
-    function sumMinutes(dayList) { return dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0) }
+    sumMinutes = dayList => dayList.reduce((sum, d) => sum + timeDiffInMinutes(d), 0),
 
-    function timeDiffInMinutes(day) {
-      return Math.max(!isStarted(day) ? 0 : (endTime(day) || today()).diff(startTime(day), 'minute'), 0)
-    }
+    timeDiffInMinutes = day => Math.max(!isStarted(day) ? 0 : (endTime(day) || today()).diff(startTime(day), 'minute'), 0),
 
-    function isOvertime(dayList) { return diffFromNormInMinutes(dayList) >= 0 }
+    isOvertime = dayList => diffFromNormInMinutes(dayList) >= 0,
 
-    function diffFromNormInMinutes(dayList) { return totalMinutes(dayList) - size(uniqueDates(dayList)) * dayNormInMinutes() }
+    diffFromNormInMinutes = dayList => totalMinutes(dayList) - size(uniqueDates(dayList)) * dayNormInMinutes(),
 
-    function dayNormInMinutes() { return 9 * 60 }
+    dayNormInMinutes = _ => 9 * 60,
 
-    function totalMinutes(dayList) {
-      return uniqueDates(dayList).reduce((sum, d) =>
-        sum + totalOfficeMinutesForDate(dayList, d.date) + totalLunchMinutesForDate(dayList, d.date), 0)
-    }
+    totalMinutes = dayList => 
+      uniqueDates(dayList).reduce((sum, d) =>
+        sum + totalOfficeMinutesForDate(dayList, d.date) + totalLunchMinutesForDate(dayList, d.date), 0),
 
-    function uniqueDates(dayList) {
-      return dayList.reduce((unique, d) => (hasSameDateAsDay(unique, d) || !isStarted(d)) ? unique : [...unique, d], [])
-    }
+    uniqueDates = dayList => 
+      dayList.reduce((unique, d) => 
+        (hasSameDateAsDay(unique, d) || !isStarted(d)) ? unique : [...unique, d], []),
 
-    function hasSameDateAsDay(dayList, day) { return size(dayList.filter(d => d.date === day.date)) > 0 }
+    hasSameDateAsDay = (dayList, day) => size(dayList.filter(d => d.date === day.date)) > 0,
 
-    function isEmpty(dayList) { return size(dayList) === 0 }
+    isEmpty = dayList => size(dayList) === 0,
 
-    function size(dayList) { return dayList.length }
+    size = dayList => dayList.length,
 
-    function last(dayList) { return dayList[0] || emptyDayWithTypeAndId('office', 1) }
+    last = dayList => dayList[0] || emptyDayWithTypeAndId('office', 1),
 
-    function emptyDay(dayList) {
-      return emptyDayWithType(dayList, isLunchAvailable(dayList) ? 'lunch' : 'office')
-    }
+    emptyDay = dayList => emptyDayWithType(dayList, isLunchAvailable(dayList) ? 'lunch' : 'office'),
 
-    function emptyDayWithType(dayList, type) { return emptyDayWithTypeAndId(type, last(dayList).id + 1) }
+    emptyDayWithType = (dayList, type) => emptyDayWithTypeAndId(type, last(dayList).id + 1),
 
-    function emptyDayWithTypeAndId(type, id) {
-      return {id: id, type, date: dateToStr(today()), startTime: '', endTime: ''}
-    }
+    emptyDayWithTypeAndId = (type, id) => ({id: id, type, date: dateToStr(today()), startTime: '', endTime: ''}),
 
-    function isLunchAvailable(dayList) {
-      return !isEmpty(dayList) && isToday(last(dayList)) && totalLunchMinutesForDate(dayList, dateToStr(today())) < 60
-    }
+    isLunchAvailable = dayList =>
+      !isEmpty(dayList) && isToday(last(dayList)) && totalLunchMinutesForDate(dayList, dateToStr(today())) < 60,
 
-    function totalLunchMinutesForDate(dayList, date) {
-      return Math.min(60, sumMinutes(dayList.filter(d => d.date === date).filter(isLunch)))
-    }
+    totalLunchMinutesForDate = (dayList, date) => 
+      Math.min(60, sumMinutes(dayList.filter(d => d.date === date).filter(isLunch))),
 
-    function totalOfficeMinutesForDate(dayList, date) {
-      return sumMinutes(dayList.filter(d => d.date === date).filter(d => !isLunch(d)))
-    }
+    totalOfficeMinutesForDate = (dayList, date) => 
+      sumMinutes(dayList.filter(d => d.date === date).filter(d => !isLunch(d)))
 
-    function isToday(day) { return day.date === dateToStr(today()) }
+    isToday = day => day.date === dateToStr(today()),
 
-    function today() { return dayjs() }
+    today = _ => dayjs(),
 
-    function dateToStr(date) { return date.format('YYYY-MM-DD') }
+    dateToStr = date => date.format('YYYY-MM-DD'),
 
-    function allDays() { 
-      const days = JSON.parse(localStorage.getItem('days')) || []
+    storageKey = _ => today().format('YYYY-MM'),
+
+    allDays = _ => { 
+      const days = JSON.parse(localStorage.getItem(storageKey())) || []
       if (isEmpty(days) || isEnded(last(days))) { return [emptyDay(days), ...days] }
       return days
-    }
+    },
 
-    function allDaysIs(dayList) {
-      localStorage.setItem('days', JSON.stringify(dayList.filter(isValidDay)))
+    allDaysAre = dayList => {
+      localStorage.setItem(storageKey(), JSON.stringify(dayList.filter(isValidDay)))
       window.dispatchEvent(new Event('storage'))
-    }
+    },
     
-    function isValidDay(day) { return day.date && startTime(day) }
+    isValidDay = day => day.date && startTime(day),
 
-    function react(reactionMap) {
-      return event => {
-        const reaction = reactionMap[event.target.dataset.action]
-        if (!reaction) { return }
-        const days = allDays()
-        reaction(event, days, dayById(days, event.target.dataset.id))
-      }
-    }
+    react = reactionMap => event => {
+      const reaction = reactionMap[event.target.dataset.action]
+      if (!reaction) { return }
+      const days = allDays()
+      const id = event.target.closest('.working-day').dataset.id
+      reaction(event, days, dayById(days, id))
+    };
 
     window.addEventListener('storage', () => render(allDays()))
     setInterval(() => render(allDays()), 60 * 1000)
     render(allDays())
-    
+
     document.body.addEventListener('click', react({
-        checkin: (_, days, day) => allDaysIs(addDay(days, markAsOffice(startTimeToNow(day)))),
+        checkin: (_, days, day) => allDaysAre(addDay(days, markAsOffice(startTimeToNow(day)))),
         checkout: (_, days, day) => {
           const newDays = replaceDay(days, day, endTimeToNow(day))
-          if (isLunch(day)) { allDaysIs(addDay(newDays, startTimeToNow(emptyDayWithType(newDays, 'office')))) }
-          else { allDaysIs(newDays) }
+          if (isLunch(day)) { allDaysAre(addDay(newDays, startTimeToNow(emptyDayWithType(newDays, 'office')))) }
+          else { allDaysAre(newDays) }
         },
-        lunch: (_, days, day) => allDaysIs(addDay(days, markAsLunch(startTimeToNow(day)))),
+        lunch: (_, days, day) => allDaysAre(addDay(days, markAsLunch(startTimeToNow(day)))),
       }), true)
 
     document.body.addEventListener('blur', react({
-      startTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeStartTime(day, target.value))),
-      endTime: ({target}, days, day) => allDaysIs(replaceDay(days, day, changeEndTime(day, target.value))),
+      startTime: ({target}, days, day) => allDaysAre(replaceDay(days, day, changeStartTime(day, target.value))),
+      endTime: ({target}, days, day) => allDaysAre(replaceDay(days, day, changeEndTime(day, target.value))),
     }), true)
+
+    const oldWorkingDays = JSON.parse(localStorage.getItem('days'))
+    if (oldWorkingDays) {
+      localStorage.setItem('2018-11', JSON.stringify(oldWorkingDays))
+      localStorage.removeItem('days')
+      window.dispatchEvent(new Event('storage'))
+    }
   })()
 </script>
 </html>
