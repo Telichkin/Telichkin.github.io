@@ -1,0 +1,159 @@
+<html>
+  <head>
+    <style>
+      body, html {
+        margin: 0;
+      }
+
+      .game-of-life {
+        font-family: sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-sizing: border-box;
+        height: 100vh;
+      }
+
+      .game-of-life button {
+        margin: 10px auto;
+        display: block;
+        padding: 5px 10px;
+      }
+
+      p, h2 {
+        text-align: center;
+        margin: 1vw;
+      }
+
+      .game-of-life span {
+        display: inline-block;
+        border: 1px solid black;
+        box-sizing: border-box;
+        width: 1.6vw;
+        height: 1.6vw;
+        max-width: 2.2vh;
+        max-height: 2.2vh;
+        cursor: default;
+      }
+
+      .game-of-life .alive {
+        background: black;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-of-life">
+      <h2>
+        <a href="https://ru.wikipedia.org/wiki/%D0%98%D0%B3%D1%80%D0%B0_%C2%AB%D0%96%D0%B8%D0%B7%D0%BD%D1%8C%C2%BB">Игра «Жизнь»</a>
+      </h1>
+      <p>Настройте начальное состояние мира, кликая на ячейки</p>
+    </div>
+  </body>
+  <script>
+  // Utils
+  const 
+
+  not_null = value => Boolean(value),
+
+  empty_arr = size => Array(size).fill(null);
+
+  // Logic
+  const 
+
+  neighbors = ([x, y]) => [
+    [x - 1, y - 1], [x, y - 1], [x + 1, y - 1],
+    [x - 1, y],                 [x + 1, y],
+    [x - 1, y + 1], [x, y + 1], [x + 1, y + 1],
+  ],
+
+  is_eq = ([x1, y1], [x2, y2]) => (x1 === x2 && y1 === y2),
+
+  is_neighbor = point => other => neighbors(point).find(p => is_eq(p, other)),
+
+  neighbors_count = (board, point) => board.filter(is_neighbor(point)).length,
+
+  is_alive = (board, point) => board.includes(point),
+
+  next_point = (board, point) => is_alive(board, point) 
+      ? ([2, 3].includes(neighbors_count(board, point)) ? point : null)
+      : (neighbors_count(board, point) === 3 ? point : null),
+
+  only_unique = arr => arr.reduce((unique, v) => unique.filter(p => is_eq(p, v)).length ? unique : [...unique, v], []),
+
+  next_board = board => only_unique(board
+    .reduce((new_board, point) => [ 
+      ...new_board,
+      next_point(board, point), 
+      ...neighbors(point).map(p => next_point(board, p))], [])
+    .filter(not_null));
+
+  // Visalisation
+  const 
+
+  vis_fit = (n, size) => (size + (n % size)) % size,
+
+  vis_cell = () => document.createElement('span'),
+
+  vis_mark_alive = cell => cell.classList.add('alive'),
+
+  vis_mark_dead = cell => cell.classList.remove('alive'),
+
+  vis_clear_board = board => board.forEach(row => row.forEach(vis_mark_dead)),
+
+  vis_board = size => empty_arr(size).map(() => empty_arr(size).map(vis_cell)),
+
+  vis_loop = (v_board, l_board) => {
+    vis_clear_board(v_board)
+    l_board.forEach(([x, y]) => 
+      vis_mark_alive(v_board[vis_fit(y, v_board.length)][vis_fit(x, v_board.length)]))
+  },
+
+  vis_setup = v_board => {
+    const game = document.querySelector('.game-of-life')
+
+    v_board.forEach(v_row => {
+      const row = document.createElement('div')
+      game.appendChild(row)
+      v_row.forEach(cell => row.appendChild(cell))
+    });
+
+    return v_board
+  },
+
+  vis_active_points = v_board => v_board.reduce((r_p, row, y) => [
+    ...r_p,
+    ...row.reduce((c_p, cell, x) => cell.classList.contains('alive') ? [...c_p, [x, y]] : c_p, [])
+  ], []),
+
+  vis_select_init_points = v_board => {
+    let interval, l_board;
+    const btn = document.createElement('button')
+    const game = document.querySelector('.game-of-life')
+    const mark_alive = ({ target }) => target.matches('span') && target.classList.toggle('alive');
+    
+    btn.innerText = 'Оживить мир'
+    game.appendChild(btn)
+
+    game.addEventListener('click', mark_alive)
+    btn.addEventListener('click', () => {
+      if (btn.innerText === 'Очистить мир') {
+        btn.remove()
+        vis_clear_board(v_board)
+        vis_select_init_points(v_board)
+        clearInterval(interval)
+      } else {
+        l_board = vis_active_points(v_board);
+        interval = setInterval(() => {
+          vis_loop(v_board, l_board)
+          l_board = next_board(l_board)
+        }, 500)
+        btn.innerText = 'Очистить мир'
+        game.removeEventListener('click', mark_alive)
+      }
+    })
+  };
+
+  vis_select_init_points(vis_setup(vis_board(30)));
+  </script>
+</html>
