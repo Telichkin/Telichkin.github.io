@@ -1,0 +1,105 @@
+<h1>Вредный рефакторинг</h1><pre>Ноябрь 2019</pre><div>В конце заметки&nbsp;<a href="https://telichk.in/notes/glided-rose-refactoring">"Рефакторинг от души"</a>&nbsp;я зачем-то создал сложного и уродливого объектно-ориентированного монстра. Вот он:&nbsp;</div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.update_quality()
+
+&nbsp; &nbsp; &nbsp; &nbsp; return items
+
+
+class Item:
+&nbsp; &nbsp; def __new__(cls, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; item_class = {
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Aged Brie": SpecialItem,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Backstage passes to a TAFKAL80ETC concert": SpecialItem,
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; "Sulfuras, Hand of Ragnaros": ImmutableItem,
+&nbsp; &nbsp; &nbsp; &nbsp; }.get(name, DefaultItem)
+
+&nbsp; &nbsp; &nbsp; &nbsp; return item_class(sell_in, quality)
+
+
+class ImmutableItem:
+&nbsp; &nbsp; def __init__(self, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; pass
+
+
+class DefaultItem(ImmutableItem):
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 0, self.quality - 1),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, self.quality - 2))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = max(0, self.quality)
+
+
+class SpecialItem(ImmutableItem):
+&nbsp; &nbsp; def update_quality(self):
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = self.sell_in - 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = cond(
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 0, 0),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 6, self.quality + 3),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &lt; 11, self.quality + 2),
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; (self.sell_in &gt;= 11, self.quality + 1))
+
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = min(50, self.quality)
+
+
+def cond(*args):
+&nbsp; &nbsp; for is_true, returnable in args:
+&nbsp; &nbsp; &nbsp; &nbsp; if is_true:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; return returnable</pre></div><div>Решить проблему — не цель этого кода. Настоящая цель — показать, что я умнее читателя и знаю больше ООП трюков. Для решения проблемы не нужны никакие классы с методом __new__, не нужно наследование, достаточно императивного кода с привычным ветвлением из if-ов:</div><div><pre class="code">class GildedRose:
+&nbsp; &nbsp; @staticmethod
+&nbsp; &nbsp; def update_quality(items):
+&nbsp; &nbsp; &nbsp; &nbsp; for item in items:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.name == 'Sulfuras, Hand of Ragnaros':
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; continue
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.sell_in -= 1
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.name in ['Aged Brie', 'Backstage passes to a TAFKAL80ETC concert']:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &lt;= 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 0
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.sell_in &lt;= 5:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality += 3
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.sell_in &lt;= 10:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality += 2
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.sell_in &gt; 10:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality += 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; else:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.sell_in &gt;= 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality -= 1
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.sell_in &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality -= 2
+
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; if item.quality &lt; 0:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 0
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; elif item.quality &gt; 50:
+&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; item.quality = 50
+
+
+class Item:
+&nbsp; &nbsp; def __init__(self, name, sell_in, quality):
+&nbsp; &nbsp; &nbsp; &nbsp; self.name = name
+&nbsp; &nbsp; &nbsp; &nbsp; self.sell_in = sell_in
+&nbsp; &nbsp; &nbsp; &nbsp; self.quality = quality
+</pre><div>Спустя пять лет самообучения программированию мой код стал превращаться в код пятилетней давности, который решает проблему самым банальным способом.</div></div><meta charset="utf-8"><title>Заметки Романа Теличкина</title><meta name="viewport" content="width=device-width, initial-scale=1.0"><link rel="stylesheet" href="/index.css"><script>
+  if (window.location.pathname.indexOf('/notes') === -1) {
+    window.location.replace('/notes' + window.location.pathname)
+  } else {
+    document.body.innerHTML = `
+  <div class="header">
+    <a href="/">Заметки Романа Теличкина</a>
+  </div>
+  <div class="main">
+    <h1>Такой заметки не существует</h1>
+  </div>  
+    `
+  }
+</script>
