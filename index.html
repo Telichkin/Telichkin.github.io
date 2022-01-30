@@ -1,35 +1,105 @@
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Заметки Романа Теличкина</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="google-site-verification" content="--xQaGHaESiGdSxat2tKVxvCUijLEtTG_njc_3CqCSg" />
-    <link rel="stylesheet" href="/index.css">
-  </head>
-  <body>
-    <div class="header">
-      <a href="/">Заметки Романа Теличкина</a>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Теличкин Роман</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rubik+Mono+One&display=swap" rel="stylesheet"> 
+
+  <style>
+    html {
+      font-family: 'Rubik Mono One', sans-serif;
+    }
+    html, body {
+      padding: 0;
+      margin: 0;
+      background-color: #000000;
+    }
+    body {
+      overflow: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    p {
+      padding: 0;
+      margin: 0;
+    }
+    a {
+      color: unset;
+      text-decoration: none;
+    }
+    a:active {
+      color: unset;
+      text-decoration: none;
+    }
+
+    .text-main {
+      font-size: min(13.18vh, 9.375vw);
+      line-height: 1;
+      color: #ffffff;
+    }
+    .content {
+      display: flex;
+      align-items: stretch;
+      flex-wrap: nowrap;
+    }
+    .left-block {
+      flex-shrink: 0;
+    }
+    .right-block {
+      flex-shrink: 0;
+    }
+
+    .green {
+      color: #29C986;
+    }
+    .red {
+      color: #FF5151;
+    }
+    .blue {
+      color: #4FA0FF;
+    }
+    .yellow {
+      color: #F3D055;
+    }
+  </style>
+</head>
+<body>
+  <div class="content">
+    <div class="left-block">
+      <p class="text-main">
+        <span class="green">Пишу</span>фронт
+      </p>
+      <p class="text-main">
+        енд<span class="red">делаю</span>п
+      </p>
+      <p class="text-main">
+        родуктовы
+      </p>
+      <p class="text-main">
+        йДизайн<span class="yellow">уп</span>
+      </p>
+      <p class="text-main">
+        <span class="yellow">равляю</span>раз
+      </p>
+      <p class="text-main">
+        работкой<a href="https://t.me/telichk.in" class="blue">@</a>
+      </p>
+      <p class="text-main blue">
+        <a href="https://t.me/telichk.in">
+          telichkin
+        </a>
+      </p>
     </div>
-    <div class="main">
-      <h1>Оглавление</h1>
-      <div>
-        <ol class="post-list" reversed="">
-          <li><a href="/notes/harmful-refactoring">Вредный рефакторинг</a></li>
-          <li><a href="/apps/game-of-life">Пятничная игра «Жизнь»</a></li>
-          <li><a href="/notes/from-tilda-to-github">Переезд заметок с Tilda на Github</a><br></li>
-          <li><a href="/notes/objects-vs-classes">Объектно-ориентированное программирование без классов</a><br></li>
-          <li><a href="/notes/paris">Париж</a><br></li>
-          <li><a href="/notes/glided-rose-refactoring">Рефакторинг от души</a><br></li>
-          <li><a href="/notes/one-inbox-is-overkill">Один инбокс для всего-всего</a><br></li>
-          <li><a href="/notes/one-level-abstraction-tests">Тесты на одном уровне абстракции</a><br></li>
-          <li><a href="/notes/popular-web-app-in-2018">Как сделать популярное веб-приложение в 2018 году?</a><br></li>
-          <li><a href="/notes/integration-or-unit-tests">Интеграционные или модульные тесты?</a><br></li>
-          <li><a href="/notes/is-elixir-syntax-sweet">У Elixir более приятный синтаксис, чем у Erlang?</a><br></li>
-          <li><a href="/notes/u-can-not-to-code-without-tests">Невозможно разрабатывать без тестов</a><br></li>
-          <li><a href="/notes/agile-experience">Какой у вас опыт работы по Agile?</a><br></li>
-          <li><a href="/notes/job-opportunities">Вакансии</a></li>
-        </ol>
-      </div>
+    <div class="right-block">
+
     </div>
-  </body>
+  </div>
+</body>
 </html>
