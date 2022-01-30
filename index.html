@@ -51,9 +51,90 @@
     }
     .left-block {
       flex-shrink: 0;
+      margin-right: 2.93vh;
     }
     .right-block {
+      display: flex;
       flex-shrink: 0;
+      flex-direction: column;
+      justify-content: space-between;
+      padding-top: min(0.9vh, 0.67vw);
+      padding-bottom: min(1.54vh, 1.14vw);
+    }
+
+    .job {
+      width: min(31.74vh, 22.57vw);
+      font-size: min(2.34vh, 1.67vw);
+      color: #ffffff;
+    }
+    .job.job-1 > p:nth-child(1) {
+      letter-spacing: 0.05em;
+    }
+    .job.job-1 > p:nth-child(2) {
+      letter-spacing: 0.015em;
+    }
+    .job.job-1 > p:nth-child(3) {
+      letter-spacing: 0.04em;
+    }
+    .job.job-1 > p:nth-child(4) {
+      letter-spacing: 0.015em;
+    }
+
+    .job.job-2 > p:nth-child(1) {
+      letter-spacing: 0.075em;
+    }
+    .job.job-2 > p:nth-child(2) {
+      letter-spacing: 0.145em;
+    }
+    .job.job-2 > p:nth-child(3) {
+      letter-spacing: -0.01em;
+    }
+
+    .job.job-3 > p:nth-child(1) {
+      letter-spacing: 0.045em;
+    }
+    .job.job-3 > p:nth-child(2) {
+      letter-spacing: 0.09em;
+    }
+    .job.job-3 > p:nth-child(3) {
+      letter-spacing: 0.18em;
+    }
+
+    .job.job-4 > p:nth-child(1) {
+      letter-spacing: 0.035em;
+    }
+    .job.job-4 > p:nth-child(2) {
+      letter-spacing: 0.1em;
+    }
+    .job.job-4 > p:nth-child(3) {
+      letter-spacing: 0.075em;
+    }
+
+    .job.job-5 > p:nth-child(1) {
+      letter-spacing: 0.035em;
+    }
+    .job.job-5 > p:nth-child(2) {
+      letter-spacing: 0.085em;
+    }
+    .job.job-5 > p:nth-child(3) {
+      letter-spacing: 0.05em;
+    }
+
+    .job.job-6 > p:nth-child(1) {
+      letter-spacing: -0.005em;
+    }
+    .job.job-6 > p:nth-child(2) {
+      letter-spacing: -0.005em;
+    }
+    .job.job-6 > p:nth-child(3) {
+      letter-spacing: 0.115em;
+    }
+
+    .job.job-7 > p:nth-child(1) {
+      letter-spacing: -0.055em;
+    }
+    .job.job-7 > p:nth-child(2) {
+      letter-spacing: -0.055em;
     }
 
     .green {
@@ -67,6 +148,15 @@
     }
     .yellow {
       color: #F3D055;
+    }
+
+    @media (max-width: 600px) {
+      .left-block {
+        margin-right: 0;
+      }
+      .right-block {
+        display: none;
+      }
     }
   </style>
 </head>
@@ -98,7 +188,89 @@
       </p>
     </div>
     <div class="right-block">
+      <div class="job job-1">
+        <p>
+          Frontend Lead <span class="red">In</span>
+        </p>
+        <p>
+          <span class="red">telocate.com</span> 202
+        </p>
+        <p>
+          0 сейчас <span class="green">TS React</span>
+        </p>
+        <p class="green">
+          mobx reactnative
+        </p>
+      </div>
 
+      <div class="job job-2">
+        <p>
+          Senior Frontend
+        </p>
+        <p>
+          <span class="red">gotrg.com</span> 2019
+        </p>
+        <p>
+          2020 <span class="green">JS Flow React</span>
+        </p>
+      </div>
+
+      <div class="job job-3">
+        <p>
+          Frontend Lead <span class="red">Су</span>
+        </p>
+        <p>
+          <span class="red">ши Wok</span> 2018 2019
+        </p>
+        <p>
+          <span class="green">JS React Redux</span>
+        </p>
+      </div>
+
+      <div class="job job-4">
+        <p>
+          FullStack dev <span class="red">ES</span>
+        </p>
+        <p>
+          <span class="red">FORCE</span> 2017 2018
+        </p>
+        <p>
+          <span class="green">Python JS TS Lua</span>
+        </p>
+      </div>
+
+      <div class="job job-5">
+        <p>
+          Automation QA <span class="red">EM</span>
+        </p>
+        <p>
+          <span class="red">C DINS</span> 2016 2017
+        </p>
+        <p>
+          <span class="green">Python Selenium</span>
+        </p>
+      </div>
+
+      <div class="job job-6">
+        <p>
+          Performance QA <span class="red">Wa</span>
+        </p>
+        <p>
+          <span class="red">rgaming</span> 2015 2016
+        </p>
+        <p>
+          <span class="green">Python JS React</span>
+        </p>
+      </div>
+
+      <div class="job job-7">
+        <p>
+          Hobby <span class="green">Erlang Elixi</span>
+        </p>
+        <p>
+          <span class="green">r Smalltalk Svelte</span>
+        </p>
+      </div>
     </div>
   </div>
 </body>
