@@ -30,7 +30,7 @@
       <button id='copy'>Копировать</button>
     </div>
 
-    <div id='result' />
+    <pre id='result' />
   </body>
 
   <script>
@@ -99,12 +99,16 @@
       }
 
       const allEats = result.filter(it => it.type === 'eat');
-      
       const allSleeps = result.filter(it => it.type === 'sleep');
-      const sleepsHumanized = allSleeps.map((sleep, index) => `#${String(index+1).padStart(2, '0')} | ${humanizeTime(sleep.timeStart)} - ${humanizeTime(sleep.timeEnd)} | ${humanizeTime(sleep.duration)}`);
-      
       const allActive = result.filter(it => it.type === 'active');
-      const activeHumanized = allActive.map((act, index) => `#${String(index+1).padStart(2, '0')} | ${humanizeTime(act.timeStart)} - ${humanizeTime(act.timeEnd)} | ${humanizeTime(act.duration)}`);
+
+      const humanizedType = {
+        eat: 'Кормление',
+        sleep: 'Сон',
+        active: 'Бодрствование',
+      };
+      const maxLen = Math.max(...Object.values(humanizedType).map(name => name.length));
+      const everythingHumanized = result.map((item, i) => `${humanizedType[item.type].padEnd(maxLen, ' ')} | ${humanizeTime(item.timeStart)} - ${humanizeTime(item.timeEnd)} | ${humanizeTime(item.duration)}`);
 
       const resultStr = `
 🍼 **Кормления**
@@ -114,18 +118,15 @@
 💤 **Сны**
 Всего: ${allSleeps.length}
 Общее время: ${humanizeTime(getTimeSum(allSleeps.map(e => e.duration)))}
-\`\`\`
-${sleepsHumanized.join('\n')}
-\`\`\`\
 
-
-🕺🏼 **Бодрствование**
+🕺🏼 **Бодрствования**
 Общее время: ${humanizeTime(getTimeSum(allActive.map(e => e.duration)))}
+
+⌚️ **Расписание**
 \`\`\`
-${activeHumanized.join('\n')}
+${everythingHumanized.join('\n')}
 \`\`\`
 `
-
       document.getElementById('result').innerText = resultStr;
     });
   </script>
