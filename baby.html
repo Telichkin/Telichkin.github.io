@@ -1,0 +1,132 @@
+<html>
+  <head>
+    <title>Стёпин режим</title>
+    <meta charset='UTF-8' />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <style>
+      #messages {
+        width: 100%;
+        max-width: 640px;
+        min-height: 200px;
+        margin-bottom: 16px;
+      }
+      #actions {
+        max-width: 640px;
+        display: flex;
+        flex-direction: column;
+        row-gap: 16px;
+      }
+      button {
+        height: 32px;
+      }
+    </style>
+  </head>
+
+  <body>
+    <textarea id='messages'></textarea>
+
+    <div id='actions'>
+      <button id='process'>Обработать</button>
+      <button id='copy'>Копировать</button>
+    </div>
+
+    <div id='result' />
+  </body>
+
+  <script>
+    const RE = /(\d{1,2})(\s+|:)(\d{2})\s(🍼|👶🏼|🕺🏼|💤)/gm;
+
+    function humanizeTime([h, m]) {
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+
+    function getTimeSum(times) {
+      let mTotal = 0;
+      for (const [h, m] of times) {
+        mTotal += (h * 60);
+        mTotal += m;
+      }
+      return [Math.floor(mTotal / 60), mTotal % 60];
+    }
+
+    function getDuration(start, end) {
+      const [h1, m1] = start;
+      const [h2, m2] = end;
+      
+      let mTotalStart = (h1 * 60) + m1;
+      // start находится в прошлых сутках
+      if (h1 > h2) {
+        mTotalStart = mTotalStart - (24 * 60);
+      }
+      const mTotalEnd = (h2 * 60) + m2;
+      
+      const mDuration = mTotalEnd - mTotalStart;
+      return [Math.floor(mDuration / 60), mDuration % 60];
+    }
+
+    document.getElementById('copy').addEventListener('click', () => {
+      navigator.clipboard.writeText(document.getElementById('result').innerText);
+    });
+
+    document.getElementById('process').addEventListener('click', () => {
+      const text = document.getElementById('messages').value;
+
+      const activities = [...text.matchAll(RE)].map(([, h, , m, type]) => ({
+        time: [parseInt(h), parseInt(m)],
+        type: type === '🍼' ? 'eat' 
+          : type === '👶🏼' ? 'eat_stop' 
+          : type === '💤' ? 'sleep'
+          : 'active',
+      }));
+
+      const result = [];
+      let prevActivity = activities.shift()
+      while (activities.length) {
+        const currActivity = activities.shift();
+
+        const timeStart = prevActivity.time;
+        const timeEnd = currActivity.time;
+        const duration = getDuration(timeStart, timeEnd);
+
+        if (prevActivity.type === 'eat') {
+          result.push({ type: 'eat', timeStart, timeEnd, duration });
+        } else if (prevActivity.type === 'sleep') {
+          result.push({ type: 'sleep', timeStart, timeEnd, duration });
+        } else if (prevActivity.type === 'active' || prevActivity.type === 'eat_stop') {
+          result.push({ type: 'active', timeStart, timeEnd, duration });
+        }
+        prevActivity = currActivity;
+      }
+
+      const allEats = result.filter(it => it.type === 'eat');
+      
+      const allSleeps = result.filter(it => it.type === 'sleep');
+      const sleepsHumanized = allSleeps.map((sleep, index) => `#${String(index+1).padStart(2, '0')} | ${humanizeTime(sleep.timeStart)} - ${humanizeTime(sleep.timeEnd)} | ${humanizeTime(sleep.duration)}`);
+      
+      const allActive = result.filter(it => it.type === 'active');
+      const activeHumanized = allActive.map((act, index) => `#${String(index+1).padStart(2, '0')} | ${humanizeTime(act.timeStart)} - ${humanizeTime(act.timeEnd)} | ${humanizeTime(act.duration)}`);
+
+      const resultStr = `
+🍼 **Кормления**
+Всего: ${allEats.length}
+Общее время: ${humanizeTime(getTimeSum(allEats.map(e => e.duration)))}
+
+💤 **Сны**
+Всего: ${allSleeps.length}
+Общее время: ${humanizeTime(getTimeSum(allSleeps.map(e => e.duration)))}
+\`\`\`
+${sleepsHumanized.join('\n')}
+\`\`\`\
+
+
+🕺🏼 **Бодрствование**
+Общее время: ${humanizeTime(getTimeSum(allActive.map(e => e.duration)))}
+\`\`\`
+${activeHumanized.join('\n')}
+\`\`\`
+`
+
+      document.getElementById('result').innerText = resultStr;
+    });
+  </script>
+</html>
