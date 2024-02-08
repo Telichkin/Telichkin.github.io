@@ -110,7 +110,8 @@
       const maxLen = Math.max(...Object.values(humanizedType).map(name => name.length));
       const everythingHumanized = result.map((item, i) => `${humanizedType[item.type].padEnd(maxLen, ' ')} | ${humanizeTime(item.timeStart)} - ${humanizeTime(item.timeEnd)} | ${humanizeTime(item.duration)}`);
 
-      const resultStr = `
+      const resultStr = `#итог
+
 🍼 **Кормления**
 Всего: ${allEats.length}
 Общее время: ${humanizeTime(getTimeSum(allEats.map(e => e.duration)))}
