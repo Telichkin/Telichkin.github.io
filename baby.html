@@ -34,7 +34,7 @@
   </body>
 
   <script>
-    const RE = /(\d{1,2})(\s+|:)(\d{2})\s(🍼|👶🏼|🕺🏼|🕺🏻|💤)/gm;
+    const RE = /(\d{1,2})(\s+|:)(\d{2})\s*(🍼|👶🏼|🕺🏼|🕺🏻|💤)/gm;
 
     function humanizeTime([h, m]) {
       return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
