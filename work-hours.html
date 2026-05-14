@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Hours Remaining This Month</title>
+<style>
+  :root {
+    --bg: #0f172a;
+    --panel: #1e293b;
+    --panel-2: #273449;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --accent: #38bdf8;
+    --accent-strong: #0ea5e9;
+    --highlight: #facc15;
+    --weekend: #f472b6;
+    --weekday: #a5b4fc;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: radial-gradient(circle at top left, #1e3a8a 0%, var(--bg) 60%);
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+  }
+
+  .card {
+    background: var(--panel);
+    border-radius: 18px;
+    padding: 2.5rem;
+    max-width: 720px;
+    width: 100%;
+    box-shadow: 0 30px 60px -20px rgba(0,0,0,0.5);
+    border: 1px solid rgba(148, 163, 184, 0.15);
+  }
+
+  h1 {
+    margin: 0 0 0.25rem;
+    font-size: 1.6rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  .subtitle {
+    color: var(--muted);
+    margin-bottom: 2rem;
+    font-size: 0.95rem;
+  }
+
+  .total {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    padding: 1.5rem;
+    background: linear-gradient(135deg, rgba(56,189,248,0.15), rgba(14,165,233,0.05));
+    border: 1px solid rgba(56, 189, 248, 0.25);
+    border-radius: 14px;
+    margin-bottom: 2rem;
+  }
+
+  .total-value {
+    font-size: 3.5rem;
+    font-weight: 700;
+    color: var(--accent);
+    line-height: 1;
+  }
+
+  .total-label {
+    color: var(--muted);
+    font-size: 1rem;
+  }
+
+  .total-label strong {
+    color: var(--text);
+    font-weight: 600;
+  }
+
+  .breakdown {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+  }
+
+  .day-card {
+    background: var(--panel-2);
+    border-radius: 10px;
+    padding: 0.9rem 1rem;
+    border: 1px solid rgba(148, 163, 184, 0.1);
+    transition: transform 0.15s ease, border-color 0.15s ease;
+  }
+
+  .day-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(56, 189, 248, 0.4);
+  }
+
+  .day-card.heavy {
+    border-color: rgba(250, 204, 21, 0.4);
+    background: linear-gradient(135deg, rgba(250,204,21,0.12), var(--panel-2));
+  }
+
+  .day-name {
+    font-size: 0.8rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 0.4rem;
+  }
+
+  .day-card.heavy .day-name {
+    color: var(--highlight);
+  }
+
+  .day-count {
+    font-size: 1.4rem;
+    font-weight: 600;
+  }
+
+  .day-formula {
+    font-size: 0.8rem;
+    color: var(--muted);
+    margin-top: 0.25rem;
+  }
+
+  .dates {
+    color: var(--muted);
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    line-height: 1.3;
+  }
+
+  .legend {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+  }
+
+  .swatch {
+    width: 12px; height: 12px; border-radius: 3px;
+  }
+
+  .swatch.heavy { background: var(--highlight); }
+  .swatch.light { background: var(--accent); }
+
+  .footer {
+    margin-top: 1.5rem;
+    padding-top: 1rem;
+    border-top: 1px solid rgba(148, 163, 184, 0.1);
+    color: var(--muted);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="title">Work Hours Remaining</h1>
+    <p class="subtitle" id="subtitle"></p>
+
+    <div class="total">
+      <span class="total-value" id="totalValue">0</span>
+      <span class="total-label">hours left <strong id="rangeLabel"></strong></span>
+    </div>
+
+    <div class="breakdown" id="breakdown"></div>
+
+    <div class="legend">
+      <span class="legend-item"><span class="swatch heavy"></span> Wednesday & Friday — 5h</span>
+      <span class="legend-item"><span class="swatch light"></span> Other days — 2h</span>
+    </div>
+
+    <div class="footer" id="footer"></div>
+  </div>
+
+<script>
+  const HEAVY_HOURS = 5;
+  const LIGHT_HOURS = 2;
+  const HEAVY_DAYS = [3, 5]; // Wed, Fri
+  const DAY_NAMES = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+  function calculate(today) {
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    const lastDay = new Date(year, month + 1, 0).getDate();
+
+    const buckets = DAY_NAMES.map(name => ({ name, dates: [], hours: 0, perDay: 0 }));
+
+    for (let d = today.getDate() + 1; d <= lastDay; d++) {
+      const date = new Date(year, month, d);
+      const dow = date.getDay();
+      const isHeavy = HEAVY_DAYS.includes(dow);
+      const hours = isHeavy ? HEAVY_HOURS : LIGHT_HOURS;
+      buckets[dow].dates.push(d);
+      buckets[dow].hours += hours;
+      buckets[dow].perDay = hours;
+    }
+
+    const total = buckets.reduce((s, b) => s + b.hours, 0);
+    return { buckets, total, lastDay };
+  }
+
+  function fmtDate(d) {
+    return d.toLocaleDateString(undefined, { weekday: 'long', month: 'long', day: 'numeric', year: 'numeric' });
+  }
+
+  const today = new Date();
+  const { buckets, total, lastDay } = calculate(today);
+  const monthName = today.toLocaleString(undefined, { month: 'long' });
+
+  document.getElementById('subtitle').textContent =
+    `Today is ${fmtDate(today)} — counting from tomorrow through the end of ${monthName}.`;
+  document.getElementById('totalValue').textContent = total;
+  document.getElementById('rangeLabel').textContent =
+    `from ${monthName} ${today.getDate() + 1} to ${monthName} ${lastDay}`;
+
+  const breakdown = document.getElementById('breakdown');
+  // Render in week order: Mon..Sun for nicer reading
+  const order = [1, 2, 3, 4, 5, 6, 0];
+  order.forEach(idx => {
+    const b = buckets[idx];
+    if (b.dates.length === 0) return;
+    const heavy = HEAVY_DAYS.includes(idx);
+    const card = document.createElement('div');
+    card.className = 'day-card' + (heavy ? ' heavy' : '');
+    card.innerHTML = `
+      <div class="day-name">${b.name}</div>
+      <div class="day-count">${b.hours}h</div>
+      <div class="day-formula">${b.dates.length} × ${b.perDay}h</div>
+      <div class="dates">${b.dates.join(', ')}</div>
+    `;
+    breakdown.appendChild(card);
+  });
+
+  document.getElementById('footer').textContent =
+    `Calculation: sum of (occurrences × hours-per-day) for each weekday remaining in ${monthName} ${today.getFullYear()}.`;
+</script>
+</body>
+</html>
