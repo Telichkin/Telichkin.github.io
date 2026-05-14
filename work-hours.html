@@ -166,6 +166,61 @@
     color: var(--muted);
     font-size: 0.85rem;
   }
+
+  .forecast {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px dashed rgba(148, 163, 184, 0.15);
+    color: var(--muted);
+    font-size: 0.78rem;
+    line-height: 1.5;
+  }
+
+  .forecast-title {
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 0.6rem;
+    opacity: 0.8;
+  }
+
+  .forecast-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 0.25rem 1rem;
+  }
+
+  .forecast-list li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.15rem 0;
+  }
+
+  .forecast-list li span:last-child {
+    color: var(--text);
+    opacity: 0.85;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .forecast-total {
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px dotted rgba(148, 163, 184, 0.15);
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.8rem;
+  }
+
+  .forecast-total strong {
+    color: var(--text);
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+  }
 </style>
 </head>
 <body>
@@ -186,6 +241,12 @@
     </div>
 
     <div class="footer" id="footer"></div>
+
+    <div class="forecast" id="forecast">
+      <div class="forecast-title">Capacity for the next 12 months</div>
+      <ul class="forecast-list" id="forecastList"></ul>
+      <div class="forecast-total" id="forecastTotal"></div>
+    </div>
   </div>
 
 <script>
@@ -249,6 +310,30 @@
 
   document.getElementById('footer').textContent =
     `Calculation: sum of (occurrences × hours-per-day) for each weekday remaining in ${monthName} ${today.getFullYear()}.`;
+
+  function fullMonthHours(year, month) {
+    const lastDay = new Date(year, month + 1, 0).getDate();
+    let hours = 0;
+    for (let d = 1; d <= lastDay; d++) {
+      const dow = new Date(year, month, d).getDay();
+      hours += HEAVY_DAYS.includes(dow) ? HEAVY_HOURS : LIGHT_HOURS;
+    }
+    return hours;
+  }
+
+  const forecastList = document.getElementById('forecastList');
+  let forecastSum = 0;
+  for (let i = 1; i <= 12; i++) {
+    const d = new Date(today.getFullYear(), today.getMonth() + i, 1);
+    const hours = fullMonthHours(d.getFullYear(), d.getMonth());
+    forecastSum += hours;
+    const label = d.toLocaleString(undefined, { month: 'short', year: '2-digit' });
+    const li = document.createElement('li');
+    li.innerHTML = `<span>${label}</span><span>${hours} h</span>`;
+    forecastList.appendChild(li);
+  }
+  document.getElementById('forecastTotal').innerHTML =
+    `<span>Next 12 months total</span><strong>${forecastSum} h</strong>`;
 </script>
 </body>
 </html>
